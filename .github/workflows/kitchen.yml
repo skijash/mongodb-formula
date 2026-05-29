@@ -40,14 +40,20 @@ jobs:
           - instance: default-gentoo-stage3-systemd-master-py3
             experimental: true
     continue-on-error: ${{ matrix.experimental == true }}
-    if: >-
-      github.event.inputs.instance == ''
-      || github.event.inputs.instance == matrix.instance
     steps:
       - uses: actions/checkout@v4
+        if: >-
+          github.event.inputs.instance == ''
+          || github.event.inputs.instance == matrix.instance
       - uses: ruby/setup-ruby@v1
+        if: >-
+          github.event.inputs.instance == ''
+          || github.event.inputs.instance == matrix.instance
         with:
           ruby-version: '3.2'
           bundler-cache: true
       - name: kitchen verify
+        if: >-
+          github.event.inputs.instance == ''
+          || github.event.inputs.instance == matrix.instance
         run: bin/kitchen verify "${{ matrix.instance }}"

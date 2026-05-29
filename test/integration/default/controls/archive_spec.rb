@@ -37,14 +37,14 @@ control 'mongodb components' do
   describe directory('/tmp/downloads') do
     it { should exist }
   end
-  describe directory('/usr/local/mongodb/mongod-4.2.6') do
+  describe directory('/usr/local/mongodb/mongod-8.0.4') do
     it { should exist }
     its('group') { should eq 'root' }
   end
-  describe file('/usr/local/mongodb/mongod-4.2.6/bin/mongod') do
+  describe file('/usr/local/mongodb/mongod-8.0.4/bin/mongod') do
     it { should exist }
   end
-  describe file('/usr/local/mongodb/mongod-4.2.6/bin/mongos') do
+  describe file('/usr/local/mongodb/mongod-8.0.4/bin/mongos') do
     it { should exist }
   end
   describe directory('/var/lib/mongodb/mongod') do

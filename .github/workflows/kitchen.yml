@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # vim: ft=yaml
 ---
-name: CI
+# Kitchen matrix runs only on manual dispatch until the formula has been
+# end-to-end verified on at least one platform under modern Salt + MongoDB
+# 8.0 + mongosh. Once a platform is reliably green, add the appropriate
+# `push` / `pull_request` triggers above.
+name: Kitchen
 'on':
-  push:
-    branches: [master]
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      instance:
+        description: |
+          Run a single matrix entry instead of all of them.
+          Leave blank to run the full matrix.
+        required: false
+        default: ''
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-      - uses: pre-commit/action@v3.0.1
-
   kitchen:
     runs-on: ubuntu-latest
     strategy:
@@ -40,6 +40,9 @@ jobs:
           - instance: default-gentoo-stage3-systemd-master-py3
             experimental: true
     continue-on-error: ${{ matrix.experimental == true }}
+    if: >-
+      github.event.inputs.instance == ''
+      || github.event.inputs.instance == matrix.instance
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1

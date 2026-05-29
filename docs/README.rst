@@ -81,6 +81,14 @@ formula::
 
     salt '*' saltutil.sync_grains
 
+The MongoDB shell (``mongosh``) is **not** installed on macOS by this
+formula. Upstream publishes mongosh only as a ``.zip`` for darwin, and
+Salt's ``archive.extracted`` has no zip equivalent of
+``--strip-components``, so the extraction layout can't be normalized
+declaratively. Install it directly instead::
+
+    brew install mongosh
+
 Contributing to this repo
 -------------------------
 

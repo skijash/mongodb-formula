@@ -199,8 +199,7 @@ include:
 {{ formula }}-{{ comp }}-{{ name }}-{{ package }}-install-symlink-{{ cmd }}:
   file.symlink:
     - name: {{ d.dir.symlink }}/{{ 's' if 'service' in software else '' }}bin/{{ cmd }}
-    - target: {{ software['path'] }}/{{ cmd }}
-    - onlyif: test -f {{ d.dir.symlink }}/{{ 's' if 'service' in software else '' }}bin/{{ cmd }}
+    - target: {{ software['path'] }}/bin/{{ cmd }}
     - force: True
 
                                         {%- endfor %}  {# command #}

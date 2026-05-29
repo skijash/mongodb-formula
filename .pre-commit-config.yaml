@@ -15,7 +15,7 @@ ci:
   autoupdate_schedule: quarterly
   skip: []
   submodules: false
-default_stages: [commit]
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/dafyddj/commitlint-pre-commit-hook
     rev: v19.8.1
@@ -25,10 +25,6 @@ repos:
         description: Lint commit message against @commitlint/config-conventional rules
         stages: [commit-msg]
         additional_dependencies: ['@commitlint/config-conventional@19.8.1']
-      - id: commitlint-travis
-        stages: [manual]
-        additional_dependencies: ['@commitlint/config-conventional@19.8.1']
-        always_run: true
   - repo: https://github.com/rubocop/rubocop
     rev: v1.86.2
     hooks:

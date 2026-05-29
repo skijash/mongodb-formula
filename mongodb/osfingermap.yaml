@@ -28,18 +28,28 @@
 {% endmacro %}
 
 {# native sources: https://www.mongodb.com/download-center/community #}
-{{ m('Amazon-2', 'yum/amazon/2/mongodb-org/REL/ARCH/RPMS/COMP-VER.amzn2.ARCH.rpm', 'amazon2') }}
-{{ m('CentOS Linux-6', 'yum/redhat/6/mongodb-org/REL/ARCH/RPMS/COMP-VER.el6.ARCH.rpm', 'rhel62') }}
-{{ m('CentOS Linux-7', 'yum/redhat/7/mongodb-org/REL/ARCH/RPMS/COMP-VER.el7.ARCH.rpm', 'rhel70') }}
-{{ m('CentOS Linux-8', 'um/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
-{{ m('Fedora-31', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
-{{ m('Fedora-32', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
-{{ m('Fedora-33', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
-{{ m('Leap-15', 'zypper/suse/15/mongodb-org/REL/ARCH/RPMS/COMP-VER.suse15.ARCH.rpm', 'suse15') }}
-{{ m('Suse', 'zypper/suse/12/mongodb-org/REL/ARCH/RPMS/COMP-VER.suse12.ARCH.rpm', 'suse12') }}
-{{ m('Debian-9', 'apt/debian/dists/stretch/mongodb-org/REL/main/binary-amd64/COMP_VER_amd64.deb', 'debian92') }}
-{{ m('Debian-10', 'apt/debian/dists/buster/mongodb-org/REL/main/binary-amd64/COMP_VER_amd64.deb', 'debian10') }}
+{# RHEL family — same el<major> tarball serves RHEL / Rocky / Alma / CentOS Stream #}
+{{ m('RedHat-8', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
+{{ m('RedHat-9', 'yum/redhat/9/mongodb-org/REL/ARCH/RPMS/COMP-VER.el9.ARCH.rpm', 'rhel90') }}
+{{ m('Rocky-8', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
+{{ m('Rocky-9', 'yum/redhat/9/mongodb-org/REL/ARCH/RPMS/COMP-VER.el9.ARCH.rpm', 'rhel90') }}
+{{ m('AlmaLinux-8', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
+{{ m('AlmaLinux-9', 'yum/redhat/9/mongodb-org/REL/ARCH/RPMS/COMP-VER.el9.ARCH.rpm', 'rhel90') }}
+{{ m('CentOS Stream-8', 'yum/redhat/8/mongodb-org/REL/ARCH/RPMS/COMP-VER.el8.ARCH.rpm', 'rhel80') }}
+{{ m('CentOS Stream-9', 'yum/redhat/9/mongodb-org/REL/ARCH/RPMS/COMP-VER.el9.ARCH.rpm', 'rhel90') }}
 
-{{ m('Ubuntu-16.04', 'apt/ubuntu/dists/xenial/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu1604') }}  # noqa 204
-{{ m('Ubuntu-18.04', 'apt/ubuntu/dists/bionic/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu1804') }}  # noqa 204
-{{ m('Ubuntu-20.04', 'apt/ubuntu/dists/bionic/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu2004') }}  # noqa 204
+{# Amazon Linux #}
+{{ m('Amazon-2', 'yum/amazon/2/mongodb-org/REL/ARCH/RPMS/COMP-VER.amzn2.ARCH.rpm', 'amazon2') }}
+{{ m('Amazon-2023', 'yum/amazon/2023/mongodb-org/REL/ARCH/RPMS/COMP-VER.amzn2023.ARCH.rpm', 'amazon2023') }}
+
+{# openSUSE / SLES #}
+{{ m('Leap-15', 'zypper/suse/15/mongodb-org/REL/ARCH/RPMS/COMP-VER.suse15.ARCH.rpm', 'suse15') }}
+
+{# Debian #}
+{{ m('Debian-11', 'apt/debian/dists/bullseye/mongodb-org/REL/main/binary-amd64/COMP_VER_amd64.deb', 'debian11') }}  # noqa 204
+{{ m('Debian-12', 'apt/debian/dists/bookworm/mongodb-org/REL/main/binary-amd64/COMP_VER_amd64.deb', 'debian12') }}  # noqa 204
+
+{# Ubuntu #}
+{{ m('Ubuntu-20.04', 'apt/ubuntu/dists/focal/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu2004') }}  # noqa 204
+{{ m('Ubuntu-22.04', 'apt/ubuntu/dists/jammy/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu2204') }}  # noqa 204
+{{ m('Ubuntu-24.04', 'apt/ubuntu/dists/noble/mongodb-org/REL/multiverse/binary-amd64/COMP_VER_amd64.deb', 'ubuntu2404') }}  # noqa 204

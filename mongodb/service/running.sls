@@ -144,10 +144,11 @@ include:
                                 {%- endif %}
                             {%- endif %}
                             {%- do service_files.append(path) %}
+                            {%- set logdir = path.rpartition('/')[0] or '/' %}
 
 {{ formula }}-service-running-{{ comp }}-{{ servicename }}-install-syslogpath:
   file.directory:
-    - name: {{ salt['cmd.run']( 'dirname ' ~ path ) }}
+    - name: {{ logdir }}
     - user: {{ software['user'] }}
     - group: {{ software['group'] }}
     - dir_mode: '0775'
@@ -172,7 +173,7 @@ include:
       - service: {{ formula }}-service-running-{{ comp }}-{{ servicename }}
                             {%- if 'selinux' in d.wanted and d.wanted.selinux %}
   selinux.fcontext_policy_present:
-    - name: {{ salt['cmd.run']( 'dirname ' ~ path ) }}'(/.*)?'
+    - name: '{{ logdir }}(/.*)?'
     - sel_type: {{ name }}_var_log_t
     - require_in:
       - selinux: {{ formula }}-service-running-{{ comp }}-{{ servicename }}-selinux-applied
@@ -189,7 +190,7 @@ include:
     - source: salt://{{ formula }}/files/default/logrotate.jinja
     - context:
         svc: {{ name }}
-        pattern: {{ salt['cmd.run']( 'dirname ' ~ path ) }}
+        pattern: {{ logdir }}
                  {%- if 'processManagement' in config and 'pidFilePath' in config['processManagement'] %}
         pidpath: {{ config['processManagement']['pidFilePath'] }}
                  {%- else %}

@@ -7,7 +7,7 @@
 # SECTION: Owner(s) for specific directories
 # FILE PATTERN                              OWNER(S)
 
-# SECTION: Owner(s) for files/directories related to `semantic-release`
+# SECTION: Owner(s) for shared formula infrastructure
 # FILE PATTERN                              OWNER(S)
 /.github/workflows/                         @saltstack-formulas/ssf
 /bin/install-hooks                          @saltstack-formulas/ssf
@@ -25,12 +25,10 @@
 /test/salt/pillar/top.sls                   @saltstack-formulas/ssf
 /.gitignore                                 @saltstack-formulas/ssf
 /.cirrus.yml                                @saltstack-formulas/ssf
-/.gitlab-ci.yml                             @saltstack-formulas/ssf
 /.pre-commit-config.yaml                    @saltstack-formulas/ssf
 /.rstcheck.cfg                              @saltstack-formulas/ssf
 /.rubocop.yml                               @saltstack-formulas/ssf
 /.salt-lint                                 @saltstack-formulas/ssf
-/.travis.yml                                @saltstack-formulas/ssf
 /.yamllint                                  @saltstack-formulas/ssf
 /AUTHORS.md                                 @saltstack-formulas/ssf
 /CHANGELOG.md                               @saltstack-formulas/ssf
@@ -42,9 +40,6 @@
 /kitchen.yml                                @saltstack-formulas/ssf
 /kitchen.vagrant.yml                        @saltstack-formulas/ssf
 /kitchen.windows.yml                        @saltstack-formulas/ssf
-/pre-commit_semantic-release.sh             @saltstack-formulas/ssf
-/release-rules.js                           @saltstack-formulas/ssf
-/release.config.js                          @saltstack-formulas/ssf
 
 # SECTION: Owner(s) for specific files
 # FILE PATTERN                              OWNER(S)

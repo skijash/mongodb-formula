@@ -30,7 +30,7 @@ mongodb:
 
     database:
       dbtools:
-        version: 100.0.1
+        version: 100.10.0
         name: mongodb-database-tools
         use_upstream: 'archive'
         archive:
@@ -45,14 +45,17 @@ mongodb:
           - mongorestore
           - mongotop
       shell:
-        version: 4.2.6
-        name: mongodb-org-shell
+        version: 2.3.0
+        name: mongodb-mongosh
         use_upstream: 'archive'
-        config_file: /etc/mongodb/mongorc.js
+        config_file: /etc/mongodb/mongoshrc.js
+        archive:
+          source: https://downloads.mongodb.com/compass/mongosh-VER-linux-ARCH.tgz
+          skip_verify: true
         commands:
-          - mongo
+          - mongosh
       mongod:
-        version: 4.2.6
+        version: 8.0.4
         name: mongodb-org-server
         use_upstream: 'archive'
         user: mongodb
@@ -63,7 +66,7 @@ mongodb:
           skip_verify: true
         archive:
           skip_verify: true
-          source: https://fastdl.mongodb.org/linux/mongodb-linux-ARCH-debian10-VER.tgz
+          source: https://fastdl.mongodb.org/linux/mongodb-linux-ARCH-debian12-VER.tgz
         config:
           # http://docs.mongodb.org/manual/reference/configuration-options
           storage:
@@ -94,16 +97,14 @@ mongodb:
           - mongotop
           - bsondump
           - mongofiles
-          - mongoreplay
           - mongos
-          - mongo
         firewall:
           ports:
             - tcp/27017
             - tcp/27018
             - tcp/27019
       mongos:
-        version: 4.2.6
+        version: 8.0.4
         name: mongodb-org-mongos
         use_upstream: null    # installed with mongod
         user: mongos

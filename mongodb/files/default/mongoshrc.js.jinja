@@ -9,26 +9,27 @@ db.dropDatabase = DB.prototype.dropDatabase = function() {
 
 prompt = function() {
   // case mongos
-  if (rs.status().info = 'mongos') {
+  if (rs.status().info === 'mongos') {
     return rs.status().info + ':[' + db.version() + '] > ';
   }
 
   // for  replicasets
+  let stateStr;
   switch (rs.status().myState) {
     case 1:
-      stateStr = 'PRIMARY'
+      stateStr = 'PRIMARY';
       break;
 
     case 2:
-      stateStr = 'SECONDARY'
+      stateStr = 'SECONDARY';
       break;
 
     case 7:
-      stateStr = 'ARBITER'
+      stateStr = 'ARBITER';
       break;
 
-    dafault:
-      stateStr = 'MONGO'
+    default:
+      stateStr = 'MONGO';
       break;
   }
   return rs.status().set + ':' + stateStr + ':[' + db.version() + '] > ';

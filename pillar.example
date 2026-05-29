@@ -24,14 +24,14 @@ mongodb:
 
     database:
       dbtools:
-        version: 100.0.1
+        version: 100.10.0
         archive:
           skip_verify: true
       shell:
         archive:
           skip_verify: true
       mongod:
-        version: 4.2.6.1
+        version: 8.0.4
         archive:
           skip_verify: true
         config:

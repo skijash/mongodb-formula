@@ -158,7 +158,7 @@ MacOS:
       shell:
         use_upstream: archive
         archive:
-          source: https://fastdl.mongodb.org/osx/mongodb-macos-ARCH-VER.tgz
+          source: https://downloads.mongodb.com/compass/mongosh-VER-darwin-ARCH.zip
           skip_verify: true
     gui:
       compass:

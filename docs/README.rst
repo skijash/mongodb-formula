@@ -54,7 +54,7 @@ Configuration can be supplied in yaml:
     mongodb:
       pkg:
         database:
-          version: 4.2.6.1
+          version: 8.0.4
           archive:
             skip_verify: true
           config:

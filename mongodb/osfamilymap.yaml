@@ -158,10 +158,11 @@ MacOS:
         archive:
           source: https://fastdl.mongodb.org/tools/db/mongodb-database-tools-macos-ARCH-VER.tgz
       shell:
-        use_upstream: archive
-        archive:
-          source: https://downloads.mongodb.com/compass/mongosh-VER-darwin-ARCH.zip
-          skip_verify: true
+        # mongosh is published only as .zip for darwin; Salt's
+        # archive.extracted has no zip equivalent of --strip-components,
+        # so the formula can't normalize the extraction layout.
+        # Install via `brew install mongosh` instead.
+        use_upstream: null
     gui:
       compass:
         name: MongoDB Compass Community

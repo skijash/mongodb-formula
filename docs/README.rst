@@ -74,6 +74,13 @@ Configuration can be supplied in yaml:
               - tcp/27018
               - tcp/27019
 
+On macOS targets the formula reads the GUI session user from the
+``mongodb_console_user`` / ``mongodb_console_group`` grains provided by
+``_grains/mongodb.py``. Sync custom grains once after first pulling the
+formula::
+
+    salt '*' saltutil.sync_grains
+
 Contributing to this repo
 -------------------------
 

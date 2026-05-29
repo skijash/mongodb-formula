@@ -11,8 +11,10 @@
 # osfamilymap: {}
 ---
 {%- if grains.os == 'MacOS' %}
-    {%- set macos_rootuser = salt['cmd.run']("stat -f '%Su' /dev/console") %}
-    {%- set macos_rootgroup = salt['cmd.run']("stat -f '%Sg' /dev/console") %}
+    {#- Populated by the custom grain in _grains/mongodb.py. #}
+    {#- Run `salt '*' saltutil.sync_grains` once after pulling the formula. #}
+    {%- set macos_rootuser = grains.get('mongodb_console_user', '') %}
+    {%- set macos_rootgroup = grains.get('mongodb_console_group', '') %}
 {%- endif %}
 
 Arch:

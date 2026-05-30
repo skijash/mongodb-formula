@@ -105,7 +105,7 @@ control 'mongodb runtime' do
     it { should be_running }
   end
 
-  describe port(27017) do
+  describe port(27_017) do
     it { should be_listening }
   end
 
@@ -121,12 +121,13 @@ control 'mongodb runtime' do
 
   # Round-trip: insert a document, read it back. Each kitchen run starts
   # fresh so no need to clean up between runs.
-  describe command(
-    %q{/usr/local/bin/mongosh --quiet --eval '} +
-    %q{db = db.getSiblingDB("inspec_test"); } +
-    %q{db.kitchen_smoke.insertOne({name: "ci-write-test"}); } +
-    %q{print(db.kitchen_smoke.findOne({name: "ci-write-test"}).name)'}
-  ) do
+  mongosh_smoke_js = <<~'JS'.chomp.tr("\n", ' ')
+    db = db.getSiblingDB("inspec_test");
+    db.kitchen_smoke.insertOne({name: "ci-write-test"});
+    print(db.kitchen_smoke.findOne({name: "ci-write-test"}).name)
+  JS
+
+  describe command("/usr/local/bin/mongosh --quiet --eval '#{mongosh_smoke_js}'") do
     its('exit_status') { should eq 0 }
     its('stdout') { should include 'ci-write-test' }
   end

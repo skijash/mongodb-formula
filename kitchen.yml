@@ -50,6 +50,13 @@ platforms:
   - name: rockylinux-8-master-py3
     driver:
       image: saltimages/salt-master-py3:rockylinux-8
+      # saltimages/salt-master-py3:rockylinux-8 doesn't bring up sshd
+      # under systemd by default, so kitchen's SSH transport never
+      # connects. Install + enable sshd at image-build time. Same
+      # treatment likely needed for almalinux-8 and oraclelinux-8.
+      provision_command:
+        - dnf install -y openssh-server
+        - systemctl enable sshd
 
 verifier:
   # https://www.inspec.io/

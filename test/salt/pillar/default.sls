@@ -10,7 +10,8 @@ mongodb:
       - dbtools
       - shell
     gui:
-      - robo3t
+      # Robo 3T was discontinued after Studio 3T acquisition; the
+      # download host has been dead since 2022.
            {%- if grains.kernel|lower == 'darwin' %}
       - compass
            {%- endif %}

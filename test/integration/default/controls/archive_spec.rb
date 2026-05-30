@@ -55,18 +55,6 @@ control 'mongodb components' do
     its('group') { should eq 'root' }
     its('mode') { should cmp '0644' }
   end
-  describe directory('/usr/local/mongodb/robo3t-1.3.1') do
-    it { should exist }
-    its('group') { should eq 'root' }
-  end
-  describe file('/usr/local/mongodb/robo3t-1.3.1/bin/robo3t') do
-    it { should exist }
-    its('group') { should eq 'root' }
-  end
-  describe directory('/usr/local/mongodb/robo3t-1.3.1/include') do
-    it { should exist }
-    its('group') { should eq 'root' }
-  end
   describe directory('/usr/local/mongodb/kafka-1.1.0') do
     it { should exist }
     its('group') { should eq 'root' }

@@ -9,12 +9,9 @@ mongodb:
       - mongos
       - dbtools
       - shell
-    gui:
-      # Robo 3T was discontinued after Studio 3T acquisition; the
-      # download host has been dead since 2022.
-           {%- if grains.kernel|lower == 'darwin' %}
-      - compass
-           {%- endif %}
+    # gui: defaults.yaml ships `wanted.gui: []`. Robo 3T was
+    # discontinued (host dead since 2022); macOS Compass is excluded
+    # here so the Linux test isn't gated on darwin-only artifacts.
     connectors:
       # bi   # enterprise advanced subscription
       - kafka

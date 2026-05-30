@@ -50,7 +50,13 @@ jobs:
           github.event.inputs.instance == ''
           || github.event.inputs.instance == matrix.instance
         with:
-          ruby-version: '3.2'
+          # Pinned to 3.0 (EOL) because kitchen-salt 0.7.2 caps
+          # net-ssh < 7.0, and net-ssh 6.x breaks on OpenSSL 3.x with
+          # `pkeys are immutable on OpenSSL 3.0`. ruby/setup-ruby
+          # ships prebuilt 3.0 binaries linked against OpenSSL 1.1.x.
+          # Bump when kitchen-salt resumes releases (currently dormant
+          # since Jan 2022) or we switch to a fork.
+          ruby-version: '3.0'
           bundler-cache: true
       - name: kitchen verify
         if: >-

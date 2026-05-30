@@ -248,7 +248,7 @@ include:
         user: {{ software['user'] }}
         group: {{ software['group'] }}
         stop: ''
-        start: {{ software['path'] }}/bin/{{ name }}
+        start: {{ software['path'] }}/bin/{{ name }} --config {{ software['config_file'] }}
     - watch_in:
       - cmd: {{ formula }}-{{ comp }}-{{ service.name }}-install-service-systemd
   cmd.wait:  # noqa: 213

@@ -12,15 +12,21 @@
 ---
 amd64:
   arch: x86_64
+  # `compass_arch` uses Node.js / mongosh conventions (x64 on amd64,
+  # arm64 unchanged) for the downloads.mongodb.com/compass/ artifacts.
+  compass_arch: x64
 
 x86_64:
   arch: x86_64
+  compass_arch: x64
 
 386:
   arch: 386
+  compass_arch: ia32
 
 arm64:
   arch: arm64
+  compass_arch: arm64
 
 armv6l:
   arch: armv6l

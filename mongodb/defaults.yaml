@@ -50,7 +50,9 @@ mongodb:
         use_upstream: 'archive'
         config_file: /etc/mongodb/mongoshrc.js
         archive:
-          source: https://downloads.mongodb.com/compass/mongosh-VER-linux-ARCH.tgz
+          # mongosh uses Node.js arch naming (x64, not x86_64), so this
+          # URL uses COMPASSARCH instead of ARCH. See osarchmap.yaml.
+          source: https://downloads.mongodb.com/compass/mongosh-VER-linux-COMPASSARCH.tgz
           skip_verify: true
         commands:
           - mongosh

@@ -48,12 +48,13 @@
                         {%- do software[package].update({'name': path}) %}
                         {%- if 'source' in v[package] %}
                             {%- set u = v[package]['source']|replace('VER', v.version) %}
-                            {%- set url = u|replace('REL', release)|replace('ARCH', d.arch) %}
+                            {# COMPASSARCH must be replaced before ARCH: `ARCH` is a substring of `COMPASSARCH`. #}
+                            {%- set url = u|replace('REL', release)|replace('COMPASSARCH', d.get('compass_arch', d.arch))|replace('ARCH', d.arch) %}
                             {%- do software[package].update({'source': url}) %}
                         {%- endif %}
                         {%- if 'source_hash' in v[package] %}
                             {%- set h = v[package]['source_hash']|replace('VER', v.version) %}
-                            {%- set hash = h|replace('REL', release)|replace('ARCH', d.arch) %}
+                            {%- set hash = h|replace('REL', release)|replace('COMPASSARCH', d.get('compass_arch', d.arch))|replace('ARCH', d.arch) %}
                             {%- do software[package].update({'source_hash': hash}) %}
                         {%- endif %}
                     {%- endif %}

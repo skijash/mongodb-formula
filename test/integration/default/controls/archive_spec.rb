@@ -95,3 +95,39 @@ control 'mongodb components' do
     its('mode') { should cmp '0640' }
   end
 end
+
+control 'mongodb runtime' do
+  title 'should be running and accept reads + writes'
+
+  describe service('mongod') do
+    it { should be_installed }
+    it { should be_enabled }
+    it { should be_running }
+  end
+
+  describe port(27017) do
+    it { should be_listening }
+  end
+
+  describe file('/usr/local/bin/mongosh') do
+    it { should exist }
+  end
+
+  # `mongosh` responds with a version banner.
+  describe command('/usr/local/bin/mongosh --quiet --eval "db.version()"') do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should match(/\d+\.\d+\.\d+/) }
+  end
+
+  # Round-trip: insert a document, read it back. Each kitchen run starts
+  # fresh so no need to clean up between runs.
+  describe command(
+    %q{/usr/local/bin/mongosh --quiet --eval '} +
+    %q{db = db.getSiblingDB("inspec_test"); } +
+    %q{db.kitchen_smoke.insertOne({name: "ci-write-test"}); } +
+    %q{print(db.kitchen_smoke.findOne({name: "ci-write-test"}).name)'}
+  ) do
+    its('exit_status') { should eq 0 }
+    its('stdout') { should include 'ci-write-test' }
+  end
+end

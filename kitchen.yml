@@ -50,12 +50,15 @@ platforms:
   - name: rockylinux-8-master-py3
     driver:
       image: saltimages/salt-master-py3:rockylinux-8
-      # saltimages/salt-master-py3:rockylinux-8 doesn't bring up sshd
-      # under systemd by default, so kitchen's SSH transport never
-      # connects. Install + enable sshd at image-build time. Same
-      # treatment likely needed for almalinux-8 and oraclelinux-8.
+      # Without these the saltimage's sshd starts but refuses every
+      # connection ("closed by remote host") because the RHEL-family
+      # base image relies on sshd-keygen.service to create host keys
+      # on first boot, and that doesn't happen reliably under
+      # systemd-in-Docker. Install openssh-server, generate host keys
+      # eagerly with `ssh-keygen -A`, then enable sshd.
       provision_command:
         - dnf install -y openssh-server
+        - ssh-keygen -A
         - systemctl enable sshd
 
 verifier:

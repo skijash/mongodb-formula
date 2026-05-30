@@ -121,7 +121,7 @@ control 'mongodb runtime' do
 
   # Round-trip: insert a document, read it back. Each kitchen run starts
   # fresh so no need to clean up between runs.
-  mongosh_smoke_js = <<~'JS'.chomp.tr("\n", ' ')
+  mongosh_smoke_js = <<~JS.chomp.tr("\n", ' ')
     db = db.getSiblingDB("inspec_test");
     db.kitchen_smoke.insertOne({name: "ci-write-test"});
     print(db.kitchen_smoke.findOne({name: "ci-write-test"}).name)

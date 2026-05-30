@@ -37,6 +37,9 @@ Debian:
       - openssl
       - tar
       - unzip
+      # Required for virtualenv.managed - Debian ships venv as a
+      # separate package; RHEL/Arch include it in python3 stdlib.
+      - python3-venv
     repo:
       file: /etc/apt/sources.list.d/mongodb-org-REL.list
       from_repo_value: {{ '' if 'oscodename' not in grains else grains.oscodename }}

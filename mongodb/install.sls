@@ -14,11 +14,20 @@ include:
 {{ formula }}-install-prerequisites:
   pkg.installed:
     - names: {{ d.pkg.deps|json }}
-  pip.installed:
-    - names: {{ d.pkg.pips|json }}
-    - reload_modules: True
+  # Install pymongo (and any future pkg.pips entries) into an isolated
+  # venv so the formula doesn't fight PEP 668's externally-managed
+  # system Python on Arch, Debian 12+, Ubuntu 24.04+, RHEL 9+, etc.
+  virtualenv.managed:
+    - name: {{ d.dir.venv }}
+    - python: python3
+    - system_site_packages: false
     - require:
       - pkg: {{ formula }}-install-prerequisites
+  pip.installed:
+    - names: {{ d.pkg.pips|json }}
+    - bin_env: {{ d.dir.venv }}
+    - require:
+      - virtualenv: {{ formula }}-install-prerequisites
   file.directory:
     - names:
       - {{ d.dir.var }}

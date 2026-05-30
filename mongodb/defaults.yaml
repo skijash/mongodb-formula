@@ -207,3 +207,4 @@ mongodb:
     symlink: /usr/local
     tmp: /tmp/downloads
     var: /var/lib/mongodb
+    venv: /opt/mongodb-formula/venv

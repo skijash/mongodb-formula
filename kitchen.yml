@@ -56,13 +56,14 @@ platforms:
       # strips its dac_override capability inside containers, which
       # makes every PAM account check fail on RHEL family (sshd,
       # sudo, etc.). Two-pronged workaround:
-      # 1. Use root for the SSH transport and skip sudo in the
-      #    provisioner/verifier - that removes the kitchen+sudo path
-      #    that was hitting PAM on every command.
+      # 1. Use root for the SSH transport (driver.username) and skip
+      #    sudo in the provisioner/verifier - that removes the
+      #    kitchen+sudo path that was hitting PAM on every command.
       # 2. UsePAM no in sshd, so sshd's own PAM stack doesn't run
       #    either.
       # This is also closer to how a real salt-minion converges - as
       # root, no sudo escalation - than the kitchen+sudo plumbing was.
+      username: root
       provision_command:
         - dnf install -y openssh-server
         - ssh-keygen -A
@@ -73,8 +74,6 @@ platforms:
           || echo 'UsePAM no' >> /etc/ssh/sshd_config
         - install -d -m 0700 -o root -g root /root/.ssh
         - systemctl enable sshd
-    transport:
-      username: root
     provisioner:
       sudo: false
     verifier:

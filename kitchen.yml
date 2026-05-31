@@ -50,20 +50,27 @@ platforms:
   - name: rockylinux-8-master-py3
     driver:
       image: saltimages/salt-master-py3:rockylinux-8
-      # The saltimage doesn't ship a usable kitchen environment:
-      # - sshd's host keys aren't generated (sshd-keygen.service
-      #   doesn't run reliably under systemd-in-Docker).
-      # - The `kitchen` user is missing from /etc/passwd; PAM rejects
-      #   pre-auth with "could not obtain user info (kitchen)".
-      # Create everything the Ubuntu saltimage gets for free: install
-      # + enable sshd, generate host keys, add the kitchen user, and
-      # give it passwordless sudo (the salt_solo provisioner runs
-      # `sudo -E salt-call ...`).
+      # Kitchen transport workaround (not a MongoDB/Salt runtime
+      # requirement - do not propagate to production-shaped tests):
+      # the GHA Ubuntu host's apparmor profile for `unix-chkpwd`
+      # strips its dac_override capability inside containers, so
+      # sshd's PAM account check can't read /etc/shadow and rejects
+      # every pre-auth ("could not obtain user info (kitchen)").
+      # Kitchen only needs SSH pubkey transport into an ephemeral
+      # container, so disable PAM in sshd entirely - smaller blast
+      # radius than `security_opt: apparmor:unconfined`.
       provision_command:
         - dnf install -y openssh-server sudo
         - ssh-keygen -A
+        - getent passwd kitchen >/dev/null
+          || useradd -m -s /bin/bash kitchen
+        - usermod -p '*' kitchen
+        - sed -ri 's/^[#[:space:]]*UsePAM[[:space:]]+.*/UsePAM no/'
+          /etc/ssh/sshd_config
+        - grep -qE '^[[:space:]]*UsePAM[[:space:]]+no'
+          /etc/ssh/sshd_config
+          || echo 'UsePAM no' >> /etc/ssh/sshd_config
         - systemctl enable sshd
-        - useradd -m -s /bin/bash kitchen
         - install -d -m 0700 -o kitchen -g kitchen /home/kitchen/.ssh
         - echo 'kitchen ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/kitchen
         - chmod 0440 /etc/sudoers.d/kitchen

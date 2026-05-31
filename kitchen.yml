@@ -73,6 +73,12 @@ platforms:
           /etc/ssh/sshd_config
           || echo 'UsePAM no' >> /etc/ssh/sshd_config
         - install -d -m 0700 -o root -g root /root/.ssh
+        # Root's shadow entry is locked by default on RHEL containers;
+        # with UsePAM no, sshd's own account check refuses to log into
+        # locked accounts even for pubkey auth. Set any non-`!`/`*`
+        # password so the lock check passes. The value is irrelevant
+        # since we never use password auth.
+        - echo 'root:kitchen' | chpasswd
         - systemctl enable sshd
     provisioner:
       sudo: false

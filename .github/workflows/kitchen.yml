@@ -87,12 +87,13 @@ jobs:
           docker ps -a
           echo "::endgroup::"
 
-          # kitchen verify doesn't auto-destroy on failure, so the container
-          # should still exist. Peek inside it for sshd / systemd state.
-          cid=$(docker ps -a --filter "ancestor=$(docker images -q | head -1)" -q | head -1)
-          if [ -z "$cid" ]; then
-            cid=$(docker ps -a -q | head -1)
-          fi
+          # kitchen verify doesn't auto-destroy on failure, so the
+          # container should still exist. Prefer one built from the
+          # image kitchen just built; fall back to the most recent
+          # container of any kind.
+          img=$(docker images -q | head -1)
+          cid=$(docker ps -a --filter "ancestor=$img" -q | head -1)
+          [ -z "$cid" ] && cid=$(docker ps -a -q | head -1)
           if [ -n "$cid" ]; then
             echo "::group::docker logs $cid"
             docker logs "$cid" 2>&1 | tail -200
@@ -108,7 +109,9 @@ jobs:
 
             echo "::group::journalctl + ssh log inside $cid"
             docker exec "$cid" journalctl --no-pager -n 200 2>&1
-            docker exec "$cid" sh -c 'cat /var/log/secure 2>/dev/null || cat /var/log/auth.log 2>/dev/null || echo "(no ssh-relevant log file)"' 2>&1
+            docker exec "$cid" cat /var/log/secure 2>/dev/null \
+              || docker exec "$cid" cat /var/log/auth.log 2>/dev/null \
+              || echo "(no ssh-relevant log file)"
             echo "::endgroup::"
           else
             echo "no container left to inspect"

@@ -80,7 +80,7 @@ RedHat:
       - selinux-policy-targeted
     repo:
       # yamllint disable-line rule:line-length
-      basesource: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/REL/$basearch
+      baseurl: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/REL/$basearch
       name: mongodb-org-REL
       humanname: MongoDB REL Repository
       gpgkey: https://www.mongodb.org/static/pgp/server-REL.asc

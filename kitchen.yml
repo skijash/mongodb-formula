@@ -65,7 +65,10 @@ platforms:
       # root, no sudo escalation - than the kitchen+sudo plumbing was.
       username: root
       provision_command:
-        - dnf install -y openssh-server
+        # python3.11-libs: provides encodings/cp437.py, which `virtualenv`
+        # needs to read its bundled wheel ZIPs when seeding setuptools/
+        # pip into a new venv. Saltimage ships python3.11 without it.
+        - dnf install -y openssh-server python3.11-libs
         - ssh-keygen -A
         - sed -ri 's/^[#[:space:]]*UsePAM[[:space:]]+.*/UsePAM no/'
           /etc/ssh/sshd_config

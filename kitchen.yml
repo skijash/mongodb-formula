@@ -53,27 +53,32 @@ platforms:
       # Kitchen transport workaround (not a MongoDB/Salt runtime
       # requirement - do not propagate to production-shaped tests):
       # the GHA Ubuntu host's apparmor profile for `unix-chkpwd`
-      # strips its dac_override capability inside containers, so
-      # sshd's PAM account check can't read /etc/shadow and rejects
-      # every pre-auth ("could not obtain user info (kitchen)").
-      # Kitchen only needs SSH pubkey transport into an ephemeral
-      # container, so disable PAM in sshd entirely - smaller blast
-      # radius than `security_opt: apparmor:unconfined`.
+      # strips its dac_override capability inside containers, which
+      # makes every PAM account check fail on RHEL family (sshd,
+      # sudo, etc.). Two-pronged workaround:
+      # 1. Use root for the SSH transport and skip sudo in the
+      #    provisioner/verifier - that removes the kitchen+sudo path
+      #    that was hitting PAM on every command.
+      # 2. UsePAM no in sshd, so sshd's own PAM stack doesn't run
+      #    either.
+      # This is also closer to how a real salt-minion converges - as
+      # root, no sudo escalation - than the kitchen+sudo plumbing was.
       provision_command:
-        - dnf install -y openssh-server sudo
+        - dnf install -y openssh-server
         - ssh-keygen -A
-        - getent passwd kitchen >/dev/null
-          || useradd -m -s /bin/bash kitchen
-        - usermod -p '*' kitchen
         - sed -ri 's/^[#[:space:]]*UsePAM[[:space:]]+.*/UsePAM no/'
           /etc/ssh/sshd_config
         - grep -qE '^[[:space:]]*UsePAM[[:space:]]+no'
           /etc/ssh/sshd_config
           || echo 'UsePAM no' >> /etc/ssh/sshd_config
+        - install -d -m 0700 -o root -g root /root/.ssh
         - systemctl enable sshd
-        - install -d -m 0700 -o kitchen -g kitchen /home/kitchen/.ssh
-        - echo 'kitchen ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/kitchen
-        - chmod 0440 /etc/sudoers.d/kitchen
+    transport:
+      username: root
+    provisioner:
+      sudo: false
+    verifier:
+      sudo: false
 
 verifier:
   # https://www.inspec.io/

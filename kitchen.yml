@@ -50,16 +50,23 @@ platforms:
   - name: rockylinux-8-master-py3
     driver:
       image: saltimages/salt-master-py3:rockylinux-8
-      # Without these the saltimage's sshd starts but refuses every
-      # connection ("closed by remote host") because the RHEL-family
-      # base image relies on sshd-keygen.service to create host keys
-      # on first boot, and that doesn't happen reliably under
-      # systemd-in-Docker. Install openssh-server, generate host keys
-      # eagerly with `ssh-keygen -A`, then enable sshd.
+      # The saltimage doesn't ship a usable kitchen environment:
+      # - sshd's host keys aren't generated (sshd-keygen.service
+      #   doesn't run reliably under systemd-in-Docker).
+      # - The `kitchen` user is missing from /etc/passwd; PAM rejects
+      #   pre-auth with "could not obtain user info (kitchen)".
+      # Create everything the Ubuntu saltimage gets for free: install
+      # + enable sshd, generate host keys, add the kitchen user, and
+      # give it passwordless sudo (the salt_solo provisioner runs
+      # `sudo -E salt-call ...`).
       provision_command:
-        - dnf install -y openssh-server
+        - dnf install -y openssh-server sudo
         - ssh-keygen -A
         - systemctl enable sshd
+        - useradd -m -s /bin/bash kitchen
+        - install -d -m 0700 -o kitchen -g kitchen /home/kitchen/.ssh
+        - echo 'kitchen ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/kitchen
+        - chmod 0440 /etc/sudoers.d/kitchen
 
 verifier:
   # https://www.inspec.io/

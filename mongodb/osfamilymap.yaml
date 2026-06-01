@@ -74,9 +74,6 @@ RedHat:
       - python2-pip
       - libcurl
       - openssl
-      # mongod / mongos 8.0 link against libcrypto.so.3 even on rhel80
-      # builds; RHEL 8 ships OpenSSL 1.1 by default.
-      - openssl3
       - tar
       - unzip
       - {{ 'policycoreutils' if grains.osrelease|int >= 8 else 'policycoreutils-python' }}

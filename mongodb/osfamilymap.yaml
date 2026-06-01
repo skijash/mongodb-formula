@@ -97,6 +97,14 @@ RedHat:
           {%- endif %}
         user: mongod
         group: mongod
+      mongos:
+          {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
+        # archive sibling: mongos binary comes from mongod tarball
+        use_upstream: null
+          {%- else %}
+        # mongodb-org-mongos is a separate RPM in MongoDB's RHEL repo
+        use_upstream: 'repo'
+          {%- endif %}
     gui:
       compass:
         use_upstream: native

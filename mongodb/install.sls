@@ -223,7 +223,6 @@ include:
                     {%- if 'service' in software and software['service'] %}
                         {%- set service = software['service'] %}
 
-                        {%- if package != 'repo' %}
 {{ formula }}-{{ comp }}-{{ service.name }}-install-service-directory:
   file.directory:
     - name: {{ d.dir.var }}/{{ name }}
@@ -257,7 +256,11 @@ include:
         user: {{ software['user'] }}
         group: {{ software['group'] }}
         stop: ''
+                            {%- if package == 'repo' %}
+        start: /usr/bin/{{ name }} --config {{ software['config_file'] }}
+                            {%- else %}
         start: {{ software['path'] }}/bin/{{ name }} --config {{ software['config_file'] }}
+                            {%- endif %}
     - watch_in:
       - cmd: {{ formula }}-{{ comp }}-{{ service.name }}-install-service-systemd
   cmd.wait:  # noqa: 213
@@ -284,7 +287,6 @@ include:
         limits: {{ d.limits }}
 
                           {%- endif %}  {# linux/darwin #}
-                        {%- endif %}   {# !repo #}
                     {%- endif %}       {# service #}
                 {%- endif %}           {# wanted #}
             {%- endfor %}              {# component #}

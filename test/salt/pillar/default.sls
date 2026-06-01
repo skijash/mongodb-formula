@@ -22,12 +22,3 @@ mongodb:
   # container doesn't load Salt's `alternatives` module (probably
   # missing `update-alternatives` in PATH), and symlinks are fine for
   # this test's purposes anyway.
-  pkg:
-    database:
-      # Force archive install across all platforms. osfamilymap's
-      # RedHat default is `repo`, but the formula assumes archive
-      # layout for mongos's ExecStart path; under repo install the
-      # binary lives at /usr/bin/mongos (separate RPM) and the unit
-      # fails 203/EXEC.
-      mongod:
-        use_upstream: archive

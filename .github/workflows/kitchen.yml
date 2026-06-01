@@ -113,6 +113,24 @@ jobs:
               || docker exec "$cid" cat /var/log/auth.log 2>/dev/null \
               || echo "(no ssh-relevant log file)"
             echo "::endgroup::"
+
+            echo "::group::os + package state inside $cid"
+            docker exec "$cid" cat /etc/os-release 2>&1
+            # dnf (RHEL family)
+            docker exec "$cid" sh -c \
+              'command -v dnf >/dev/null && dnf repolist --enabled' 2>&1 \
+              | head -30 || true
+            docker exec "$cid" sh -c \
+              'command -v dnf >/dev/null && dnf provides "libcrypto.so.3()(64bit)"' \
+              2>&1 | head -30 || true
+            docker exec "$cid" sh -c \
+              'command -v dnf >/dev/null && dnf search openssl 2>&1
+               | grep -iE "openssl|crypto"' 2>&1 | head -30 || true
+            # apt (Debian family)
+            docker exec "$cid" sh -c \
+              'command -v apt >/dev/null && apt list --installed 2>/dev/null
+               | grep -iE "openssl|crypto"' 2>&1 | head -30 || true
+            echo "::endgroup::"
           else
             echo "no container left to inspect"
           fi

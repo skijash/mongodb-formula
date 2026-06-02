@@ -102,6 +102,16 @@ RedHat:
         # mongodb-org-mongos is a separate RPM in MongoDB's RHEL repo
         use_upstream: 'repo'
           {%- endif %}
+      dbtools:
+          {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
+        use_upstream: 'archive'
+          {%- else %}
+        # MongoDB only publishes archive tarballs for specific RHEL minor
+        # versions (e.g. rhel88, rhel93) and our osfingermap's rhel80
+        # oscode 403s. Use the official RHEL repo's mongodb-database-tools
+        # RPM instead - same approach as mongod/mongos.
+        use_upstream: 'repo'
+          {%- endif %}
     gui:
       compass:
         use_upstream: native

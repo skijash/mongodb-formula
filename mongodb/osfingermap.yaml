@@ -6,7 +6,8 @@
   pkg:
     database:
       mongod:
-        use_upstream: archive
+        # use_upstream intentionally not set; defer to osfamilymap
+        # (RHEL family uses 'repo') / defaults.yaml ('archive' elsewhere).
         archive:
           source: https://fastdl.mongodb.org/linux/mongodb-linux-ARCH-{{ oscode }}-VER.tgz
           source_hash: https://fastdl.mongodb.org/linux/mongodb-linux-ARCH-{{ oscode }}-VER.tgz.sha256

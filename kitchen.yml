@@ -2,6 +2,44 @@
 # vim: ft=yaml
 ---
 # For help on this file's format, see https://kitchen.ci/
+
+# Kitchen transport workaround (not a MongoDB/Salt runtime requirement -
+# do not propagate to production-shaped tests): the GHA Ubuntu host's
+# apparmor profile for `unix-chkpwd` strips its dac_override capability
+# inside containers, which makes every PAM account check fail on RHEL
+# family (sshd, sudo, etc.). Two-pronged workaround:
+#   1. Use root for the SSH transport (driver.username) and skip sudo
+#      in the provisioner/verifier - removes the kitchen+sudo path that
+#      was hitting PAM on every command.
+#   2. UsePAM no in sshd, so sshd's own PAM stack doesn't run either.
+# Also closer to how a real salt-minion converges (as root, no sudo).
+# `_anchors` is not a recognized test-kitchen key; it exists only so
+# the anchors below are defined before being referenced in `platforms:`.
+_anchors:
+  rhel_driver: &rhel_driver
+    username: root
+    provision_command:
+      # python3.11-libs: provides encodings/cp437.py, which `virtualenv`
+      # needs to read its bundled wheel ZIPs when seeding setuptools/
+      # pip into a new venv. Saltimage ships python3.11 without it.
+      - dnf install -y openssh-server python3.11-libs
+      - ssh-keygen -A
+      - sed -ri 's/^[#[:space:]]*UsePAM[[:space:]]+.*/UsePAM no/'
+        /etc/ssh/sshd_config
+      - grep -qE '^[[:space:]]*UsePAM[[:space:]]+no'
+        /etc/ssh/sshd_config
+        || echo 'UsePAM no' >> /etc/ssh/sshd_config
+      - install -d -m 0700 -o root -g root /root/.ssh
+      # Root's shadow entry is locked by default on RHEL containers;
+      # with UsePAM no, sshd's own account check refuses to log into
+      # locked accounts even for pubkey auth. Set any non-`!`/`*`
+      # password so the lock check passes. The value is unused since
+      # we never use password auth.
+      - echo 'root:kitchen' | chpasswd
+      - systemctl enable sshd
+  rhel_no_sudo: &rhel_no_sudo
+    sudo: false
+
 driver:
   name: docker
   use_sudo: false
@@ -33,7 +71,10 @@ platforms:
       max_ssh_sessions: 1
   - name: oraclelinux-8-master-py3
     driver:
+      <<: *rhel_driver
       image: saltimages/salt-master-py3:oraclelinux-8
+    provisioner: *rhel_no_sudo
+    verifier: *rhel_no_sudo
   - name: arch-base-latest-master-py3
     driver:
       image: saltimages/salt-master-py3:arch-base-latest
@@ -46,47 +87,16 @@ platforms:
       image: saltimages/salt-master-py3:gentoo-stage3-systemd
   - name: almalinux-8-master-py3
     driver:
+      <<: *rhel_driver
       image: saltimages/salt-master-py3:almalinux-8
+    provisioner: *rhel_no_sudo
+    verifier: *rhel_no_sudo
   - name: rockylinux-8-master-py3
     driver:
+      <<: *rhel_driver
       image: saltimages/salt-master-py3:rockylinux-8
-      # Kitchen transport workaround (not a MongoDB/Salt runtime
-      # requirement - do not propagate to production-shaped tests):
-      # the GHA Ubuntu host's apparmor profile for `unix-chkpwd`
-      # strips its dac_override capability inside containers, which
-      # makes every PAM account check fail on RHEL family (sshd,
-      # sudo, etc.). Two-pronged workaround:
-      # 1. Use root for the SSH transport (driver.username) and skip
-      #    sudo in the provisioner/verifier - that removes the
-      #    kitchen+sudo path that was hitting PAM on every command.
-      # 2. UsePAM no in sshd, so sshd's own PAM stack doesn't run
-      #    either.
-      # This is also closer to how a real salt-minion converges - as
-      # root, no sudo escalation - than the kitchen+sudo plumbing was.
-      username: root
-      provision_command:
-        # python3.11-libs: provides encodings/cp437.py, which `virtualenv`
-        # needs to read its bundled wheel ZIPs when seeding setuptools/
-        # pip into a new venv. Saltimage ships python3.11 without it.
-        - dnf install -y openssh-server python3.11-libs
-        - ssh-keygen -A
-        - sed -ri 's/^[#[:space:]]*UsePAM[[:space:]]+.*/UsePAM no/'
-          /etc/ssh/sshd_config
-        - grep -qE '^[[:space:]]*UsePAM[[:space:]]+no'
-          /etc/ssh/sshd_config
-          || echo 'UsePAM no' >> /etc/ssh/sshd_config
-        - install -d -m 0700 -o root -g root /root/.ssh
-        # Root's shadow entry is locked by default on RHEL containers;
-        # with UsePAM no, sshd's own account check refuses to log into
-        # locked accounts even for pubkey auth. Set any non-`!`/`*`
-        # password so the lock check passes. The value is irrelevant
-        # since we never use password auth.
-        - echo 'root:kitchen' | chpasswd
-        - systemctl enable sshd
-    provisioner:
-      sudo: false
-    verifier:
-      sudo: false
+    provisioner: *rhel_no_sudo
+    verifier: *rhel_no_sudo
 
 verifier:
   # https://www.inspec.io/

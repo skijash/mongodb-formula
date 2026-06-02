@@ -14,7 +14,9 @@
           source: https://repo.mongodb.org/{{ uri|replace('COMP', 'mongodb-org-server') }}
           skip_verify: true
       dbtools:
-        use_upstream: archive
+        # use_upstream intentionally not set here so osfamilymap can
+        # override it (RHEL uses 'repo'); defaults.yaml provides
+        # 'archive' for everyone else.
         archive:
           source: https://fastdl.mongodb.org/tools/db/mongodb-database-tools-{{ oscode }}-ARCH-VER.tgz  # noqa 204
           skip_verify: true

@@ -36,32 +36,32 @@ By default only MongoDB server component (`mongod`) is installed.  This behaviou
           - bi
           - kafka
 
-Configuration can be supplied in yaml:
+Configuration can be supplied in yaml. Note the per-component key
+(``mongod``) - settings at ``database:`` level are ignored:
 
 .. code-block:: yaml
 
     mongodb:
       pkg:
         database:
-          version: 8.0.4
-          archive:
-            skip_verify: true
-          config:
-            # http://docs.mongodb.org/manual/reference/configuration-options
-            storage:
-              dbPath: /var/lib/mongodb/mongod
-            replication:
-              replSetName: "rs1"
-            sharding:
-              clusterRole: shardsvr
-            net:
-              bindIp: '0.0.0.0,::'
-              port: 27018
-          firewall:
-            ports:
-              - tcp/27017
-              - tcp/27018
-              - tcp/27019
+          mongod:
+            version: 8.0.4
+            config:
+              # http://docs.mongodb.org/manual/reference/configuration-options
+              storage:
+                dbPath: /var/lib/mongodb/mongod
+              replication:
+                replSetName: "rs1"
+              sharding:
+                clusterRole: shardsvr
+              net:
+                bindIp: '0.0.0.0,::'
+                port: 27018
+            firewall:
+              ports:
+                - tcp/27017
+                - tcp/27018
+                - tcp/27019
 
 On macOS targets the formula reads the GUI session user from the
 ``mongodb_console_user`` / ``mongodb_console_group`` grains provided by

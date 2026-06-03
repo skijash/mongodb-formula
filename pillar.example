@@ -10,7 +10,8 @@ mongodb:
       # dbtools
       # shell
     gui:
-      - robo3t
+      # robo3t was discontinued after Studio 3T's acquisition; the
+      # download host has been dead since 2022. Use Compass instead.
          {%- if grains.kernel|lower == 'darwin' %}
       - compass    # mongodb compass upstream rpm/deb packages has gui dependencies
          {%- endif %}
@@ -29,11 +30,11 @@ mongodb:
     database:
       mongod:
         version: 8.0.4
-        # On repo-install platforms, dnf/apt fuzzy-match against this
-        # value. For a strict version-release pin, set the full RHEL/
-        # Debian package version, e.g. version: '8.0.4-1.el8'. Don't
-        # do this on archive-install platforms (Amazon/macOS) - the
-        # `VER` placeholder in the archive URL would get the suffix.
+        # See docs/README.rst "Version pinning under repo install" for
+        # how to strict-pin on RHEL/Debian. Note that strict pins like
+        # '8.0.4-1.el8' must be applied via a per-OS pillar (top.sls
+        # grain match), since archive-install platforms substitute the
+        # same value into the archive URL.
         config:
           # http://docs.mongodb.org/manual/reference/configuration-options
           storage:

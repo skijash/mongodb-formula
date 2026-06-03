@@ -32,10 +32,17 @@ _anchors:
       - install -d -m 0700 -o root -g root /root/.ssh
       # Root's shadow entry is locked by default on RHEL containers;
       # with UsePAM no, sshd's own account check refuses to log into
-      # locked accounts even for pubkey auth. Set any non-`!`/`*`
-      # password so the lock check passes. The value is unused since
-      # we never use password auth.
-      - echo 'root:kitchen' | chpasswd
+      # locked accounts even for pubkey auth. Set the shadow password
+      # field to a non-`!`/`*` placeholder so the lock check passes
+      # but no real password could ever match (literal "NP" is not a
+      # valid crypt hash).
+      - usermod -p 'NP' root
+      # Belt-and-braces: disable password auth in sshd entirely, and
+      # restrict root login to pubkey only. Combined with the invalid
+      # shadow placeholder above, there's no usable password path.
+      - echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
+      - echo 'KbdInteractiveAuthentication no' >> /etc/ssh/sshd_config
+      - echo 'PermitRootLogin prohibit-password' >> /etc/ssh/sshd_config
       - systemctl enable sshd
   rhel_no_sudo: &rhel_no_sudo
     sudo: false

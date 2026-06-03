@@ -32,7 +32,10 @@ mongodb:
       dbtools:
         version: 100.10.0
         name: mongodb-database-tools
-        use_upstream: 'archive'
+        # MongoDB's official apt / yum repo is the primary path on
+        # Linux. osfamilymap.yaml overrides to 'archive' for Amazon
+        # Linux and macOS where the repo isn't published.
+        use_upstream: 'repo'
         archive:
           skip_verify: true
         commands:
@@ -60,7 +63,10 @@ mongodb:
       mongod:
         version: 8.0.4
         name: mongodb-org-server
-        use_upstream: 'archive'
+        # MongoDB's official apt / yum repo is the primary path on
+        # Linux. osfamilymap.yaml overrides to 'archive' for Amazon
+        # Linux and macOS where the repo isn't published.
+        use_upstream: 'repo'
         user: mongodb
         group: mongodb
         config_file: /etc/mongodb/mongod.conf
@@ -109,7 +115,11 @@ mongodb:
       mongos:
         version: 8.0.4
         name: mongodb-org-mongos
-        use_upstream: null    # installed with mongod
+        # Repo install on Linux: mongos is a separate package
+        # (mongodb-org-mongos). osfamilymap.yaml overrides to `null`
+        # for Amazon and macOS where mongos comes bundled with mongod's
+        # archive tarball instead.
+        use_upstream: 'repo'
         user: mongos
         group: mongos
         config_file: /etc/mongodb/mongos.conf

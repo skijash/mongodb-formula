@@ -25,6 +25,16 @@ Arch:
       - tar
       - curl
       - openssl
+    # No MongoDB Arch repo upstream; fall back to archive install for
+    # the server components. Arch users with AUR can install
+    # mongodb-bin / mongodb-tools-bin / mongosh-bin separately.
+    database:
+      mongod:
+        use_upstream: 'archive'
+      mongos:
+        use_upstream: null
+      dbtools:
+        use_upstream: 'archive'
 
 Alpine: {}
 
@@ -52,15 +62,8 @@ Debian:
       name: deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/{{ grains.os|lower }} {{ grains.oscodename }}/mongodb-org/REL {{ 'main' if grains.os in ('Debian',) else 'multiverse' }}
       # yamllint enable-line rule:line-length
                  {%- endif %}
-    database:
-      mongod:
-        use_upstream: 'repo'
-      mongos:
-        # mongodb-org-mongos is a separate package in MongoDB's apt repo
-        use_upstream: 'repo'
-      dbtools:
-        # mongodb-database-tools is a separate package
-        use_upstream: 'repo'
+    # mongod / mongos / dbtools `use_upstream: 'repo'` comes from
+    # defaults.yaml - no per-Debian override needed.
     gui:
       compass:
         use_upstream: native
@@ -92,32 +95,23 @@ RedHat:
       humanname: MongoDB REL Repository
       gpgkey: https://www.mongodb.org/static/pgp/server-REL.asc
       from_repo_value: ''
+    # mongod / mongos / dbtools `use_upstream: 'repo'` comes from
+    # defaults.yaml. Amazon Linux is the exception: MongoDB's official
+    # yum repo doesn't cover the amzn2/amzn2023 oscodes (server-amzn2
+    # isn't published), so it falls back to archive.
     database:
       mongod:
-          {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
-        use_upstream: 'archive'
-          {%- else %}
-        use_upstream: 'repo'
-          {%- endif %}
         user: mongod
         group: mongod
-      mongos:
-          {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
-        # archive sibling: mongos binary comes from mongod tarball
-        use_upstream: null
-          {%- else %}
-        # mongodb-org-mongos is a separate RPM in MongoDB's RHEL repo
-        use_upstream: 'repo'
-          {%- endif %}
-      dbtools:
           {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
         use_upstream: 'archive'
-          {%- else %}
-        # MongoDB only publishes archive tarballs for specific RHEL minor
-        # versions (e.g. rhel88, rhel93) and our osfingermap's rhel80
-        # oscode 403s. Use the official RHEL repo's mongodb-database-tools
-        # RPM instead - same approach as mongod/mongos.
-        use_upstream: 'repo'
+          {%- endif %}
+          {%- if 'osfinger' in grains and 'amazon' in grains.osfinger|lower %}
+      mongos:
+        # archive sibling: mongos binary comes from mongod tarball
+        use_upstream: null
+      dbtools:
+        use_upstream: 'archive'
           {%- endif %}
     gui:
       compass:
@@ -171,14 +165,19 @@ MacOS:
   pkg:
     deps:
       - curl
+    # MongoDB doesn't publish an official macOS apt/yum repo; install
+    # mongod / mongos / dbtools from the macOS archive instead.
     database:
       mongod:
+        use_upstream: 'archive'
         service:
           name: org.mongo.mongodb.mongod
         archive:
           source: https://fastdl.mongodb.org/osx/mongodb-macos-ARCH-VER.tgz
           source_hash: https://fastdl.mongodb.org/osx/mongodb-macos-ARCH-VER.tgz.sha256
       mongos:
+        # archive sibling: mongos binary comes from mongod tarball
+        use_upstream: null
         service:
           name: org.mongo.mongodb.mongos
       dbtools:

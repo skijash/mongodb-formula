@@ -104,6 +104,9 @@ include:
                                 {%- endif %}
                             {%- else %}  {# package #}
     - name: {{ software.get('name', name) }}
+                                {%- if 'version' in software and software['version'] %}
+    - version: {{ software['version'] }}
+                                {%- endif %}
                             {%- endif %}
     - reload_modules: true
 

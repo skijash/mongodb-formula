@@ -29,10 +29,10 @@ mongodb:
 
     database:
       mongod:
-        version: 8.0.4
+        version: 8.0.20
         # See docs/README.rst "Version pinning under repo install" for
         # how to strict-pin on RHEL/Debian. Note that strict pins like
-        # '8.0.4-1.el8' must be applied via a per-OS pillar (top.sls
+        # '8.0.20-1.el8' must be applied via a per-OS pillar (top.sls
         # grain match), since archive-install platforms substitute the
         # same value into the archive URL.
         config:

@@ -45,7 +45,7 @@ Configuration can be supplied in yaml. Note the per-component key
       pkg:
         database:
           mongod:
-            version: 8.0.4
+            version: 8.0.20
             config:
               # http://docs.mongodb.org/manual/reference/configuration-options
               storage:
@@ -85,14 +85,14 @@ On Linux server platforms (Debian, Ubuntu, non-Amazon RHEL family),
 the formula installs MongoDB from the official apt / yum repo. The
 repo URL is pinned to the major-minor stream derived from
 ``mongodb:pkg:database:mongod:version`` (e.g. ``mongodb-org/8.0`` for
-version ``8.0.4``), so the universe of installable packages is
+version ``8.0.20``), so the universe of installable packages is
 constrained at the repo level - you can only get ``8.0.x`` from the
 ``8.0`` stream.
 
 The ``version`` field is also passed to ``pkg.installed`` as the
 version argument. dnf and apt do fuzzy prefix matching on it: bare
-``8.0.4`` typically resolves to whichever build the repo currently
-publishes (e.g. ``8.0.4-1.el8`` on RHEL 8).
+``8.0.20`` typically resolves to whichever build the repo currently
+publishes (e.g. ``8.0.20-1.el8`` on RHEL 8).
 
 For strict version-release pinning, override ``version`` in pillar
 with the full package-manager version string::
@@ -101,8 +101,8 @@ with the full package-manager version string::
       pkg:
         database:
           mongod:
-            version: '8.0.4-1.el8'   # RHEL 8 strict pin
-            # version: '8.0.4'        # default - dnf fuzzy match
+            version: '8.0.20-1.el8'   # RHEL 8 strict pin
+            # version: '8.0.20'        # default - dnf fuzzy match
 
 This only matters on repo-install platforms. On archive-install
 platforms (Amazon Linux, macOS), the ``version`` value is substituted

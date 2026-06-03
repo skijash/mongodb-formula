@@ -61,7 +61,7 @@ mongodb:
         commands:
           - mongosh
       mongod:
-        version: 8.0.4
+        version: 8.0.20
         name: mongodb-org-server
         # MongoDB's official apt / yum repo is the primary path on
         # Linux. osfamilymap.yaml overrides to 'archive' for Amazon
@@ -113,7 +113,7 @@ mongodb:
             - tcp/27018
             - tcp/27019
       mongos:
-        version: 8.0.4
+        version: 8.0.20
         name: mongodb-org-mongos
         # Repo install on Linux: mongos is a separate package
         # (mongodb-org-mongos). osfamilymap.yaml overrides to `null`

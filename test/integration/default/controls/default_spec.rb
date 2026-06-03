@@ -106,10 +106,13 @@ control 'mongodb runtime' do
     it { should exist }
   end
 
-  # `mongosh` responds with a version banner.
+  # `mongosh` responds with a version in the 8.0 stream the formula
+  # pins via the repo URL. Patch level may drift if the repo publishes
+  # newer 8.0.x before we bump defaults.yaml - hence stream match, not
+  # exact equality.
   describe command('/usr/local/bin/mongosh --quiet --eval "db.version()"') do
     its('exit_status') { should eq 0 }
-    its('stdout') { should match(/\d+\.\d+\.\d+/) }
+    its('stdout') { should match(/^8\.0\.\d+/) }
   end
 
   # Round-trip: insert a document, read it back. Each kitchen run starts

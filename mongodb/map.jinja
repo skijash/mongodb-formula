@@ -73,7 +73,7 @@
     {# REL -> major.minor (MongoDB's repo paths use 8.0, not 8.0.4). #}
     {%- set _mv = d.pkg.database.mongod.version.split('.') %}
     {%- set repo_rel = _mv[0] ~ '.' ~ _mv[1] %}
-    {%- for fname in ('file', 'name', 'humanname', 'gpgkey', 'baseurl') %}
+    {%- for fname in ('file', 'name', 'humanname', 'gpgkey', 'key_url', 'baseurl') %}
         {%- if fname in d.pkg.repo %}
             {%- do d.pkg.repo.update({fname: d.pkg.repo[fname]|replace('REL', repo_rel)}) %}
         {%- endif %}

@@ -52,8 +52,13 @@ Debian:
       - python3-venv
     repo:
       file: /etc/apt/sources.list.d/mongodb-org-REL.list
-      keyid: 9DA31620334BD75D9DCB49F368818C72E52529D4
-      keyserver: hkp://keyserver.ubuntu.com:80
+      # https://pgp.mongodb.com/ is MongoDB's current key host. The
+      # previous keyserver-based approach used the old key fingerprint
+      # served at www.mongodb.org which 301-redirects. Note: for
+      # Ubuntu 24.04+ apt-key is removed entirely, which requires
+      # `aptkey: false` + a signed-by= path baked into the sources
+      # line. Not addressed here.
+      key_url: https://pgp.mongodb.com/server-REL.asc
                  {%- if 'oscodename' in grains %}
       # `grains.os|lower` returns 'debian' or 'ubuntu' - both serve
       # separate paths under repo.mongodb.org/apt/. The component is
@@ -93,7 +98,9 @@ RedHat:
       baseurl: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/REL/$basearch
       name: mongodb-org-REL
       humanname: MongoDB REL Repository
-      gpgkey: https://www.mongodb.org/static/pgp/server-REL.asc
+      # pgp.mongodb.com is MongoDB's current key host.
+      # www.mongodb.org/static/pgp/ now 301-redirects here.
+      gpgkey: https://pgp.mongodb.com/server-REL.asc
       from_repo_value: ''
     # mongod / mongos / dbtools `use_upstream: 'repo'` comes from
     # defaults.yaml. Amazon Linux is the exception: MongoDB's official

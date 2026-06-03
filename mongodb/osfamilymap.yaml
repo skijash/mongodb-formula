@@ -42,18 +42,25 @@ Debian:
       - python3-venv
     repo:
       file: /etc/apt/sources.list.d/mongodb-org-REL.list
-      from_repo_value: {{ '' if 'oscodename' not in grains else grains.oscodename }}
       keyid: 9DA31620334BD75D9DCB49F368818C72E52529D4
       keyserver: hkp://keyserver.ubuntu.com:80
                  {%- if 'oscodename' in grains %}
+      # `grains.os|lower` returns 'debian' or 'ubuntu' - both serve
+      # separate paths under repo.mongodb.org/apt/. The component is
+      # `main` on Debian, `multiverse` on Ubuntu.
       # yamllint disable-line rule:line-length
-      name: deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/{{ grains.os_family|lower }} {{ grains.oscodename }}/mongodb-org/REL {{ 'main' if grains.os in ('Debian',) else 'multiverse' }}
+      name: deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/{{ grains.os|lower }} {{ grains.oscodename }}/mongodb-org/REL {{ 'main' if grains.os in ('Debian',) else 'multiverse' }}
       # yamllint enable-line rule:line-length
                  {%- endif %}
     database:
       mongod:
-        name: mongodb-org
-        use_upstream: 'archive'    # using 'repo' caused a conflict
+        use_upstream: 'repo'
+      mongos:
+        # mongodb-org-mongos is a separate package in MongoDB's apt repo
+        use_upstream: 'repo'
+      dbtools:
+        # mongodb-database-tools is a separate package
+        use_upstream: 'repo'
     gui:
       compass:
         use_upstream: native

@@ -19,21 +19,21 @@ mongodb:
       - kafka
 
   pkg:
-    deps:
-      - python-pip
+    # On Debian/Ubuntu and non-Amazon RHEL family the formula installs
+    # mongod / mongos / dbtools from MongoDB's official apt / yum repo.
+    # To force archive install instead, override per component:
+    #   database:
+    #     mongod:
+    #       use_upstream: archive
 
     database:
-      dbtools:
-        version: 100.10.0
-        archive:
-          skip_verify: true
-      shell:
-        archive:
-          skip_verify: true
       mongod:
         version: 8.0.4
-        archive:
-          skip_verify: true
+        # On repo-install platforms, dnf/apt fuzzy-match against this
+        # value. For a strict version-release pin, set the full RHEL/
+        # Debian package version, e.g. version: '8.0.4-1.el8'. Don't
+        # do this on archive-install platforms (Amazon/macOS) - the
+        # `VER` placeholder in the archive URL would get the suffix.
         config:
           # http://docs.mongodb.org/manual/reference/configuration-options
           storage:
@@ -54,38 +54,15 @@ mongodb:
         config:
           net:
             bindIp: '{{ grains.ipv4[-1] or grains.ipv6[-1] or '0.0.0.0' }}'
-          net:
           sharding:
             configDB: 'rs1/{{ grains.ipv4[-1] or grains.ipv6[-1] }}:27018'
         firewall:
           ports:
             - tcp/9093
             # tcp/9094
-    gui:
-      compass:
-        version: 1.21.2
-        archive:
-          skip_verify: true
-      robo3t:
-        version: 1.3.1
     connectors:
-      bi:
-        version: 2.13.4
-        archive:
-          skip_verify: true
-        service:
-          name: mongosqld
-        firewall:
-          ports: tcp/29017
       kafka:
         version: 1.1.0
-        archive:
-          skip_verify: true
-      spark:
-        name: mongo-spark
-        version: 2.4.1
-        archive:
-          skip_verify: true
 
   # Just here for testing
   added_in_defaults: pillar_value

@@ -102,7 +102,17 @@ This installs the MongoDB solution.
 ``mongodb.install``
 ^^^^^^^^^^^^^^^^^^^
 
-This state will install mongodb components on MacOS and GNU/Linux from archive.
+This state installs MongoDB components using the platform-appropriate
+upstream source:
+
+- Debian / Ubuntu and non-Amazon RHEL family (Rocky, Alma, Oracle, RHEL):
+  MongoDB's official apt / yum repository (``mongodb-org-server``,
+  ``mongodb-org-mongos``, ``mongodb-database-tools``).
+- Amazon Linux and macOS: archive tarball extracted under
+  ``/usr/local/mongodb/``.
+
+The default per platform is set in ``mongodb/osfamilymap.yaml`` and can
+be overridden per-component via pillar (e.g. ``mongodb:pkg:database:mongod:use_upstream``).
 
 ``mongodb.config``
 ^^^^^^^^^^^^^^^^^^

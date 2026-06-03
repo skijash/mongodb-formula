@@ -37,21 +37,9 @@ control 'mongodb components' do
   describe directory('/tmp/downloads') do
     it { should exist }
   end
-  # Archive-extract paths only exist on Debian-family, which uses
-  # use_upstream:archive. RHEL family installs via MongoDB's official
-  # RPM into /usr/bin/ - covered by the runtime control.
-  if os.family == 'debian'
-    describe directory('/usr/local/mongodb/mongod-8.0.4') do
-      it { should exist }
-      its('group') { should eq 'root' }
-    end
-    describe file('/usr/local/mongodb/mongod-8.0.4/bin/mongod') do
-      it { should exist }
-    end
-    describe file('/usr/local/mongodb/mongod-8.0.4/bin/mongos') do
-      it { should exist }
-    end
-  end
+  # Both Debian and RHEL now repo-install mongod / mongos as
+  # /usr/bin/ binaries; archive-extract paths don't exist anymore.
+  # The `mongodb runtime` control below verifies the binaries work.
   describe directory('/var/lib/mongodb/mongod') do
     it { should exist }
   end

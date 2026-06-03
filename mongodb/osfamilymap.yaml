@@ -25,6 +25,9 @@ Arch:
       - tar
       - curl
       - openssl
+      # Salt's virtualenv.managed shells out to `virtualenv`; the
+      # Arch saltimage doesn't preinstall it.
+      - python-virtualenv
 
 Alpine: {}
 

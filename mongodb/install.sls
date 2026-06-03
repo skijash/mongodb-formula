@@ -14,20 +14,21 @@ include:
 {{ formula }}-install-prerequisites:
   pkg.installed:
     - names: {{ d.pkg.deps|json }}
-  # Install pymongo (and any future pkg.pips entries) into an isolated
-  # venv so the formula doesn't fight PEP 668's externally-managed
-  # system Python on Arch, Debian 12+, Ubuntu 24.04+, RHEL 9+, etc.
-  virtualenv.managed:
-    - name: {{ d.dir.venv }}
-    - python: python3
-    - system_site_packages: false
+  # Create the isolated venv via stdlib `python3 -m venv` rather than
+  # Salt's virtualenv.managed - the latter's binary-discovery is
+  # fragile across distros (wrong python/site-packages pairing on
+  # rolling images). `venv` is in every Python 3 stdlib (Debian
+  # splits it as `python3-venv`, which is in pkg.deps).
+  cmd.run:
+    - name: python3 -m venv {{ d.dir.venv }}
+    - creates: {{ d.dir.venv }}/bin/python
     - require:
       - pkg: {{ formula }}-install-prerequisites
   pip.installed:
     - names: {{ d.pkg.pips|json }}
     - bin_env: {{ d.dir.venv }}
     - require:
-      - virtualenv: {{ formula }}-install-prerequisites
+      - cmd: {{ formula }}-install-prerequisites
   file.directory:
     - names:
       - {{ d.dir.var }}

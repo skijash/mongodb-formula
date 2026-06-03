@@ -25,9 +25,6 @@ Arch:
       - tar
       - curl
       - openssl
-      # Salt's virtualenv.managed shells out to `virtualenv`; the
-      # Arch saltimage doesn't preinstall it.
-      - python-virtualenv
 
 Alpine: {}
 
@@ -40,10 +37,9 @@ Debian:
       - openssl
       - tar
       - unzip
-      # Salt's virtualenv.managed shells out to the `virtualenv`
-      # binary (with a Python-import fallback); install both.
+      # Required for `python3 -m venv` - Debian ships venv as a
+      # separate package; RHEL/Arch include it in python3 stdlib.
       - python3-venv
-      - python3-virtualenv
     repo:
       file: /etc/apt/sources.list.d/mongodb-org-REL.list
       from_repo_value: {{ '' if 'oscodename' not in grains else grains.oscodename }}
@@ -80,10 +76,6 @@ RedHat:
       - openssl
       - tar
       - unzip
-      # Salt's virtualenv.managed shells out to `virtualenv`. Rocky/
-      # Alma/Oracle saltimages happen to ship it today, but the
-      # formula shouldn't rely on that.
-      - python3-virtualenv
       - {{ 'policycoreutils' if grains.osrelease|int >= 8 else 'policycoreutils-python' }}
       - selinux-policy-targeted
     repo:

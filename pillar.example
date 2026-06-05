@@ -9,12 +9,12 @@ mongodb:
       - mongos
       # dbtools
       # shell
-    gui:
-      # robo3t was discontinued after Studio 3T's acquisition; the
-      # download host has been dead since 2022. Use Compass instead.
-         {%- if grains.kernel|lower == 'darwin' %}
-      - compass    # mongodb compass upstream rpm/deb packages has gui dependencies
-         {%- endif %}
+    # gui components are off by default. Robo 3T was discontinued
+    # after Studio 3T's acquisition (download host dead since 2022).
+    # To enable Compass on macOS, override this list via a darwin
+    # grain match in your own pillar; an inline Jinja `if` here would
+    # render `gui: null` on non-Darwin and break install.sls.
+    gui: []
     connectors:
       # bi   # enterprise subscription only
       - kafka

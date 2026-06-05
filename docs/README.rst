@@ -29,11 +29,11 @@ By default only MongoDB server component (`mongod`) is installed.  This behaviou
           - mongos
           - dbtools
           - shell
-        gui:
-          - robo3t
-          - compass
+        # gui: keep as `[]` if you don't want a desktop GUI. Robo 3T
+        # was discontinued; on macOS you can add `- compass`.
+        gui: []
         connectors:
-          - bi
+          # - bi   # MongoDB Enterprise Advanced subscription only
           - kafka
 
 Configuration can be supplied in yaml. Note the per-component key

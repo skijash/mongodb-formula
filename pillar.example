@@ -27,6 +27,15 @@ mongodb:
     #     mongod:
     #       use_upstream: archive
 
+    # `venv_python` is the binary used to create the pymongo venv.
+    # Default `python3` works for classic salt-minion installs and is
+    # covered by the formula's OS deps. Override for onedir minions or
+    # versioned-only Python installs; if you use a versioned binary,
+    # make sure the matching interpreter is managed in pkg.deps or
+    # elsewhere:
+    #   venv_python: /opt/saltstack/salt/bin/python
+    #   venv_python: python3.11
+
     database:
       mongod:
         version: 8.0.20

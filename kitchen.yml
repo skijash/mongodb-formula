@@ -46,6 +46,13 @@ _anchors:
       - systemctl enable sshd
   rhel_no_sudo: &rhel_no_sudo
     sudo: false
+  # RHEL 8 saltimages (rocky/alma/oracle) ship python3.11 via salt's
+  # own RPM deps but no `python3` alternative is set up. Point venv
+  # creation at the right binary via a per-platform pillar overlay.
+  rhel8_provisioner: &rhel8_provisioner
+    sudo: false
+    pillars_from_files:
+      mongodb.sls: test/salt/pillar/rhel-8.sls
 
 driver:
   name: docker
@@ -80,7 +87,7 @@ platforms:
     driver:
       <<: *rhel_driver
       image: saltimages/salt-master-py3:oraclelinux-8
-    provisioner: *rhel_no_sudo
+    provisioner: *rhel8_provisioner
     verifier: *rhel_no_sudo
   - name: arch-base-latest-master-py3
     driver:
@@ -96,13 +103,13 @@ platforms:
     driver:
       <<: *rhel_driver
       image: saltimages/salt-master-py3:almalinux-8
-    provisioner: *rhel_no_sudo
+    provisioner: *rhel8_provisioner
     verifier: *rhel_no_sudo
   - name: rockylinux-8-master-py3
     driver:
       <<: *rhel_driver
       image: saltimages/salt-master-py3:rockylinux-8
-    provisioner: *rhel_no_sudo
+    provisioner: *rhel8_provisioner
     verifier: *rhel_no_sudo
 
 verifier:

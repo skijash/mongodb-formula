@@ -14,13 +14,13 @@ include:
 {{ formula }}-install-prerequisites:
   pkg.installed:
     - names: {{ d.pkg.deps|json }}
-  # Create the isolated venv via stdlib `python3 -m venv` rather than
-  # Salt's virtualenv.managed - the latter's binary-discovery is
-  # fragile across distros (wrong python/site-packages pairing on
-  # rolling images). `venv` is in every Python 3 stdlib (Debian
-  # splits it as `python3-venv`, which is in pkg.deps).
+  # Create the isolated venv via stdlib `python -m venv`. Binary name
+  # is configurable (defaults.yaml: pkg.venv_python) so users on
+  # onedir minions or distros without a `python3` alternative can
+  # point at the right interpreter. `venv` is in every Python 3 stdlib
+  # (Debian splits it as `python3-venv`, which is in pkg.deps).
   cmd.run:
-    - name: python3 -m venv {{ d.dir.venv }}
+    - name: {{ d.pkg.venv_python }} -m venv {{ d.dir.venv }}
     - creates: {{ d.dir.venv }}/bin/python
     - require:
       - pkg: {{ formula }}-install-prerequisites

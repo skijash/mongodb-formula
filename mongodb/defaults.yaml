@@ -20,6 +20,13 @@ mongodb:
       - tar
     pips:
       - pymongo
+    # Python binary used to create the isolated venv for pkg.pips.
+    # Default works on classic salt-minion installs where system
+    # python3 is in PATH and is covered by OS deps. Onedir minions can
+    # override to `/opt/saltstack/salt/bin/python`; minions using a
+    # versioned-only python can set this to `python3.11` etc. if they
+    # also manage that interpreter in pkg.deps or elsewhere.
+    venv_python: python3
     repo:
       humanname: mongodb
       name: mongodb

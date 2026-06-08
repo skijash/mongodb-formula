@@ -86,9 +86,6 @@ RedHat:
       group: mongod
   pkg:
     deps:
-      # Required for `python3 -m venv` in install.sls. RHEL 8+ ships
-      # python3 with venv in the stdlib.
-      - python3
       - libcurl
       - openssl
       - tar

@@ -70,12 +70,16 @@
 
 {%- do d.pkg.database.mongos.update({'path': d.pkg.database.mongod.path}) %}
 {%- if 'repo' in d.pkg and 'mongod' in d.pkg.database %}
-    {# REL -> major.minor (MongoDB's repo paths use 8.0, not 8.0.4). #}
+    {# REL -> major.minor for the repo path (8.3 has its own apt/yum tree),
+       but the GPG key is only published per major line at server-{major}.0.asc -
+       rapid releases (8.1, 8.2, 8.3, ...) share the .0 key. #}
     {%- set _mv = d.pkg.database.mongod.version.split('.') %}
     {%- set repo_rel = _mv[0] ~ '.' ~ _mv[1] %}
+    {%- set key_rel = _mv[0] ~ '.0' %}
     {%- for fname in ('file', 'name', 'humanname', 'gpgkey', 'key_url', 'baseurl') %}
         {%- if fname in d.pkg.repo %}
-            {%- do d.pkg.repo.update({fname: d.pkg.repo[fname]|replace('REL', repo_rel)}) %}
+            {%- set _rel = key_rel if fname in ('gpgkey', 'key_url') else repo_rel %}
+            {%- do d.pkg.repo.update({fname: d.pkg.repo[fname]|replace('REL', _rel)}) %}
         {%- endif %}
     {%- endfor %}
 {%- endif %}

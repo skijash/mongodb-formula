@@ -1,0 +1,30 @@
+#########################################################
+# File managed by Salt. Changes risk being overwritten.
+#########################################################
+[Unit]
+Description=MongoDB transparent hugepages tuning ({{ mode }})
+DefaultDependencies=no
+After=sysinit.target local-fs.target
+Before=mongod.service mongos.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+{%- set thp_prefix = '/sys/kernel/mm/transparent_hugepage/' %}
+{%- set thp_bases = ['/sys/kernel/mm/transparent_hugepage', '/sys/kernel/mm/redhat_transparent_hugepage'] %}
+{#- "if exists, write" - a missing alt base path is expected and skips
+    silently; a write to an existing path that fails (permission, kernel
+    reject) propagates and fails the unit, which blocks mongod start. #}
+{%- for path, value in settings %}
+{%-   if path.startswith(thp_prefix) %}
+{%-     set rel = path[thp_prefix|length:] %}
+{%-     for base in thp_bases %}
+ExecStart=/bin/sh -c 'if [ -e {{ base }}/{{ rel }} ]; then echo "{{ value }}" > {{ base }}/{{ rel }}; fi'
+{%-     endfor %}
+{%-   else %}
+ExecStart=/bin/sh -c 'if [ -e {{ path }} ]; then echo "{{ value }}" > {{ path }}; fi'
+{%-   endif %}
+{%- endfor %}
+
+[Install]
+WantedBy=basic.target

@@ -3,6 +3,7 @@
 
 {%- set tplroot = tpldir.split('/')[0] %}
 {%- from tplroot ~ "/map.jinja" import data as d with context %}
+{%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
 {%- set sls_config_users = tplroot ~ '.config.users' %}
 {%- set sls_software_install = tplroot ~ '.install' %}
 {%- set formula = d.formula %}
@@ -12,23 +13,91 @@ include:
   - {{ sls_software_install }}
 
     {%- if grains.kernel|lower == 'linux' %}
-{{ formula }}-service-running-prerequisites:
-  file.managed:
+        {%- if d.wanted.disable_transparent_hugepages %}
+            {# v8+ enables THP for the new TCMalloc per-CPU caches.
+               Exception per MongoDB docs: RHEL/Oracle 8 on ppc64le/s390x
+               and RHEL/Oracle/CentOS 9 on ppc64le still ship legacy
+               TCMalloc, so THP stays disabled on those platforms. #}
+            {%- set _osarch = grains.get('osarch', '') %}
+            {%- set _osmajor = grains.get('osmajorrelease', 0)|int %}
+            {%- set _legacy_tcmalloc =
+                  grains.os_family == 'RedHat'
+                  and (
+                    (_osmajor == 8 and _osarch in ('ppc64le', 's390x'))
+                    or (_osmajor == 9 and _osarch == 'ppc64le')
+                  ) %}
+            {%- set thp_mode = 'enable' if (d.get('mongo_major', 0) >= 8 and not _legacy_tcmalloc) else 'disable' %}
+            {%- set thp_settings = d.thp_settings[thp_mode] %}
+            {%- set thp_unit = '/etc/systemd/system/mongodb-thp.service' %}
+
+{{ formula }}-service-running-thp-legacy-init-absent:
+  file.absent:
     - name: /etc/init.d/disable-transparent-hugepages
-    - source: salt://{{ formula }}/files/disable-transparent-hugepages.init
-    - unless: test -f /etc/init.d/disable-transparent-hugepages 2>/dev/null
-    - onlyif: {{ d.wanted.disable_transparent_hugepages }}
-    - mode: '0755'
-    - makedirs: True
+
+{{ formula }}-service-running-thp-unit:
+  file.managed:
+    - name: {{ thp_unit }}
+    - source: {{ files_switch(['mongodb-thp.service.jinja'],
+                              lookup=formula ~ '-service-running-thp-unit')
+              }}
+    - mode: '0644'
+    - user: root
+    - group: root
+    - template: jinja
+    - context:
+        mode: {{ thp_mode }}
+        settings: {{ thp_settings|json }}
     - require:
       - sls: {{ sls_software_install }}
       - sls: {{ sls_config_users }}
+      - file: {{ formula }}-service-running-thp-legacy-init-absent
+  cmd.wait:
+    - name: systemctl daemon-reload
+    - watch:
+      - file: {{ formula }}-service-running-thp-unit
+
+            {%- set thp_check_specs = [] %}
+            {%- for path, value in thp_settings %}
+                {%- do thp_check_specs.append('"' ~ path ~ '=' ~ value ~ '"') %}
+            {%- endfor %}
+
+{{ formula }}-service-running-thp-converge:
   cmd.run:
-    - name: echo never >/sys/kernel/mm/transparent_hugepage/enabled
-    - onlyif: {{ d.wanted.disable_transparent_hugepages }}
+    # Reapply when any current value drifts from expected (e.g. tuned /
+    # ktune flips THP behind our back). On a clean host every check
+    # passes and the restart is skipped.
+    - name: systemctl restart mongodb-thp.service
+    - unless: |
+        for spec in {{ thp_check_specs|join(' ') }}; do
+          primary=${spec%%=*}
+          want=${spec#*=}
+          # mirror the unit's path expansion: check whichever THP base
+          # exists. for non-THP specs the sed is a no-op and alt == primary.
+          alt=$(echo "$primary" | sed 's|/transparent_hugepage/|/redhat_transparent_hugepage/|')
+          for path in "$primary" "$alt"; do
+            [ -r "$path" ] || continue
+            cur=$(cat "$path")
+            case "$path" in
+              */enabled|*/defrag)
+                cur=$(echo "$cur" | sed -n 's/.*\[\([^]]*\)\].*/\1/p')
+                ;;
+            esac
+            [ "$cur" = "$want" ] || exit 1
+          done
+        done
     - require:
-      - file: {{ formula }}-service-running-prerequisites
+      - cmd: {{ formula }}-service-running-thp-unit
+
+{{ formula }}-service-running-thp-enabled:
+  service.enabled:
+    - name: mongodb-thp.service
+    - require:
+      - cmd: {{ formula }}-service-running-thp-unit
+
+        {%- endif %}
+
         {%- if d.wanted.firewall %}
+{{ formula }}-service-running-firewall:
   pkg.installed:
     - name: firewalld
     - reload_modules: true
@@ -225,8 +294,8 @@ include:
     - ports: {{ software['firewall']['ports']|json }}
                             {%- if grains.kernel|lower == 'linux' %}
     - require:
-      - pkg: {{ formula }}-service-running-prerequisites
-      - service: {{ formula }}-service-running-prerequisites
+      - pkg: {{ formula }}-service-running-firewall
+      - service: {{ formula }}-service-running-firewall
                             {%- endif %}
     - require_in:
       - service: {{ formula }}-service-running-{{ comp }}-{{ servicename }}
@@ -259,6 +328,13 @@ include:
     - require:
       - sls: {{ sls_software_install }}
       - sls: {{ sls_config_users }}
+                        {%- if grains.kernel|lower == 'linux'
+                              and d.wanted.disable_transparent_hugepages
+                              and comp == 'database' %}
+      # block mongod/mongos start until THP converge has run, so the
+      # process inherits the right kernel state on first boot.
+      - cmd: {{ formula }}-service-running-thp-converge
+                        {%- endif %}
                         {%- if 'config' in software and software['config'] is mapping %}
     - watch:
       - file: {{ formula }}-config-file-{{ servicename }}-file-managed

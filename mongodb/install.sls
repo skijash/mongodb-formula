@@ -260,6 +260,7 @@ include:
         user: {{ software['user'] }}
         group: {{ software['group'] }}
         stop: ''
+        environ: {{ software.get('environ', {})|json }}
                             {%- if package == 'repo' %}
         start: /usr/bin/{{ name }} --config {{ software['config_file'] }}
                             {%- else %}

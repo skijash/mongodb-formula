@@ -69,19 +69,34 @@
 {%- do d.update({'formula': 'mongodb'}) %}
 
 {%- do d.pkg.database.mongos.update({'path': d.pkg.database.mongod.path}) %}
-{%- if 'repo' in d.pkg and 'mongod' in d.pkg.database %}
-    {# REL -> major.minor for the repo path (8.3 has its own apt/yum tree),
-       but the GPG key is only published per major line at server-{major}.0.asc -
-       rapid releases (8.1, 8.2, 8.3, ...) share the .0 key. #}
+{%- if 'mongod' in d.pkg.database %}
     {%- set _mv = d.pkg.database.mongod.version.split('.') %}
-    {%- set repo_rel = _mv[0] ~ '.' ~ _mv[1] %}
-    {%- set key_rel = _mv[0] ~ '.0' %}
-    {%- for fname in ('file', 'name', 'humanname', 'gpgkey', 'key_url', 'baseurl') %}
-        {%- if fname in d.pkg.repo %}
-            {%- set _rel = key_rel if fname in ('gpgkey', 'key_url') else repo_rel %}
-            {%- do d.pkg.repo.update({fname: d.pkg.repo[fname]|replace('REL', _rel)}) %}
+    {%- do d.update({'mongo_major': _mv[0]|int}) %}
+    {# v8+ TCMalloc per-CPU caches need glibc rseq disabled. Harmless on
+       older majors; user pillar takes precedence if it sets the var.
+       NOTE: highstate writes this into the mongod systemd unit, but a
+       running mongod will not pick it up until the operator restarts
+       the service. The formula deliberately does not auto-restart a
+       running database. #}
+    {%- if _mv[0]|int >= 8 and grains.kernel|lower == 'linux' %}
+        {%- set _md_env = d.pkg.database.mongod.environ %}
+        {%- if 'GLIBC_TUNABLES' not in _md_env %}
+            {%- do _md_env.update({'GLIBC_TUNABLES': 'glibc.pthread.rseq=0'}) %}
         {%- endif %}
-    {%- endfor %}
+    {%- endif %}
+    {%- if 'repo' in d.pkg %}
+        {# REL -> major.minor for the repo path (8.3 has its own apt/yum tree),
+           but the GPG key is only published per major line at server-{major}.0.asc -
+           rapid releases (8.1, 8.2, 8.3, ...) share the .0 key. #}
+        {%- set repo_rel = _mv[0] ~ '.' ~ _mv[1] %}
+        {%- set key_rel = _mv[0] ~ '.0' %}
+        {%- for fname in ('file', 'name', 'humanname', 'gpgkey', 'key_url', 'baseurl') %}
+            {%- if fname in d.pkg.repo %}
+                {%- set _rel = key_rel if fname in ('gpgkey', 'key_url') else repo_rel %}
+                {%- do d.pkg.repo.update({fname: d.pkg.repo[fname]|replace('REL', _rel)}) %}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
 {%- endif %}
 
 {%- set data = d %}

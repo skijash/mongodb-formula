@@ -57,14 +57,25 @@ control 'mongodb components' do
   #   its('group') { should eq 'root' }
   #   its('mode') { should cmp '0644' }
   # end
-  describe file('/etc/init.d/disable-transparent-hugepages') do
+  # v8+ replaces the SysV init with a systemd oneshot that ENABLES THP
+  # (required for the new TCMalloc per-CPU caches). Kitchen suites pin
+  # mongod to the 8.0 stream, so the active mode here is 'always'.
+  describe file('/etc/systemd/system/mongodb-thp.service') do
     it { should exist }
-    its('mode') { should cmp '0755' }
+    its('mode') { should cmp '0644' }
+    its('content') { should match(%r{echo "always" > /sys/kernel/mm/transparent_hugepage/enabled}) }
+    its('content') { should match(%r{echo "defer\+madvise" > /sys/kernel/mm/transparent_hugepage/defrag}) }
+    # Red Hat alias path must also be wired up; missing it regresses
+    # hosts that only expose /sys/kernel/mm/redhat_transparent_hugepage.
+    its('content') { should match(%r{echo "always" > /sys/kernel/mm/redhat_transparent_hugepage/enabled}) }
+  end
+  describe service('mongodb-thp') do
+    it { should be_enabled }
   end
   describe file('/sys/kernel/mm/transparent_hugepage/enabled') do
     it { should exist }
     its('group') { should eq 'root' }
-    # its('content') { should eq 'always madvise [never]' }
+    its('content') { should match(/\[always\]/) }
   end
   describe file('/etc/mongodb') do
     it { should exist }

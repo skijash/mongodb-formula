@@ -11,7 +11,22 @@ mongodb:
     connectors: []
     firewall: false
     selinux: false
+    # Master switch for THP tuning. On MongoDB <8 this disables THP
+    # (the historical recommendation). On MongoDB >=8 this enables THP
+    # with the values the new TCMalloc per-CPU caches require - see
+    # https://www.mongodb.com/docs/manual/administration/tcmalloc-performance/
+    # Set to false to leave THP alone entirely.
     disable_transparent_hugepages: true
+  # THP settings written by service/running.sls, picked by mongo_major.
+  thp_settings:
+    enable:
+      - ['/sys/kernel/mm/transparent_hugepage/enabled', 'always']
+      - ['/sys/kernel/mm/transparent_hugepage/defrag', 'defer+madvise']
+      - ['/sys/kernel/mm/transparent_hugepage/khugepaged/max_ptes_none', '0']
+      - ['/proc/sys/vm/overcommit_memory', '1']
+    disable:
+      - ['/sys/kernel/mm/transparent_hugepage/enabled', 'never']
+      - ['/sys/kernel/mm/transparent_hugepage/defrag', 'never']
   pkg:
     deps:
       - python-pip

@@ -11,6 +11,9 @@ Documentation=https://github.com/saltstack-formulas/mongodb-formula
 User={{ user }}
 Group={{ group }}
 WorkingDirectory={{ workdir }}
+{%- for k, v in (environ or {}).items()|sort %}
+Environment="{{ k }}={{ v|string|replace('\\', '\\\\')|replace('"', '\\"') }}"
+{%- endfor %}
 ExecStart={{ start }}
 ExecStop={{ stop }}
 PIDFile=/var/run/{{ name }}.pid

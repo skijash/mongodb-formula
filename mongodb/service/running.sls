@@ -51,9 +51,11 @@ include:
       - sls: {{ sls_software_install }}
       - sls: {{ sls_config_users }}
       - file: {{ formula }}-service-running-thp-legacy-init-absent
-  cmd.wait:
+
+{{ formula }}-service-running-thp-daemon-reload:
+  cmd.run:
     - name: systemctl daemon-reload
-    - watch:
+    - onchanges:
       - file: {{ formula }}-service-running-thp-unit
 
             {%- set thp_check_specs = [] %}
@@ -86,13 +88,13 @@ include:
           done
         done
     - require:
-      - cmd: {{ formula }}-service-running-thp-unit
+      - cmd: {{ formula }}-service-running-thp-daemon-reload
 
 {{ formula }}-service-running-thp-enabled:
   service.enabled:
     - name: mongodb-thp.service
     - require:
-      - cmd: {{ formula }}-service-running-thp-unit
+      - cmd: {{ formula }}-service-running-thp-daemon-reload
 
         {%- endif %}
 

@@ -76,6 +76,10 @@ platforms:
     driver:
       image: saltimages/salt-master-py3:ubuntu-22.04
       run_command: /lib/systemd/systemd
+  - name: ubuntu-2404-master-py3
+    driver:
+      image: saltimages/salt-master-py3:ubuntu-24.04
+      run_command: /lib/systemd/systemd
   - name: opensuse-tmbl-latest-master-py3
     driver:
       image: saltimages/salt-master-py3:opensuse-tumbleweed-latest

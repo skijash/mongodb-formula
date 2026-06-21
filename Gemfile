@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Local kitchen verified on Ruby 3.3.6 + net-ssh 7.x (OpenSSL 3).
+# CI still pins Ruby 3.0 for net-ssh 6.x + OpenSSL 1.1 prebuilt
+# binaries from ruby/setup-ruby; see .github/workflows/kitchen.yml.
+
 source ENV.fetch('PROXY_RUBYGEMSORG', 'https://rubygems.org')
 
 # Install the `inspec` gem using `git` because versions after `4.22.22`

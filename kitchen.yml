@@ -81,11 +81,12 @@ platforms:
       image: saltimages/salt-master-py3:ubuntu-24.04
       run_command: /lib/systemd/systemd
       provision_command:
-        # OpenSSH 9.x dropped ssh-rsa from PubkeyAcceptedAlgorithms.
-        # The kitchen-salt 0.7.2 -> net-ssh 6.x chain (pinned, see ruby
-        # comment below) still signs RSA keys with ssh-rsa, so sshd
-        # rejects pubkey auth with "signature algorithm ssh-rsa not in
-        # PubkeyAcceptedAlgorithms". Re-permit it for the test only.
+        # OpenSSH 9.x dropped ssh-rsa from PubkeyAcceptedAlgorithms by
+        # default. kitchen-docker generates an RSA host key and the
+        # net-ssh client (any version in our pinned range) negotiates
+        # ssh-rsa for it, which sshd then refuses with "signature
+        # algorithm ssh-rsa not in PubkeyAcceptedAlgorithms".
+        # Re-permit it for the test only.
         - install -d -m 0755 /etc/ssh/sshd_config.d
         - printf 'PubkeyAcceptedAlgorithms +ssh-rsa\nHostKeyAlgorithms +ssh-rsa\n'
           > /etc/ssh/sshd_config.d/00-kitchen-ssh-rsa.conf

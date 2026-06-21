@@ -89,7 +89,10 @@ include:
                             {%- if package == 'repo' and 'repo' in d.pkg and d.pkg.repo %}
   pkgrepo.managed:
     {%- for k, v in d.pkg.repo|dictsort %}
-    {%-   if v %}
+    {#- skip only None / unset; explicit booleans (e.g. aptkey: False)
+        must pass through, otherwise pkgrepo.managed defaults to True
+        and runs the legacy apt-key path. #}
+    {%-   if v is not none %}
     - {{ k }}: {{ v|json }}
     {%-   endif %}
     {%- endfor %}

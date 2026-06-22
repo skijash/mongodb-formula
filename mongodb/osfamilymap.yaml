@@ -52,19 +52,21 @@ Debian:
       - python3-venv
     repo:
       file: /etc/apt/sources.list.d/mongodb-org-REL.list
-      # https://pgp.mongodb.com/ is MongoDB's current key host. The
-      # previous keyserver-based approach used the old key fingerprint
-      # served at www.mongodb.org which 301-redirects. Note: for
-      # Ubuntu 24.04+ apt-key is removed entirely, which requires
-      # `aptkey: false` + a signed-by= path baked into the sources
-      # line. Not addressed here.
+      # Ubuntu 24.04+ ships without apt-key entirely; Debian 12 / Ubuntu
+      # 22.04 still have it but the signed-by= keyring path is the
+      # modern, recommended shape across the whole Debian family.
+      # Salt's add_repo_key always dearmors `BEGIN PGP` keys via
+      # `gpg --dearmor` and writes the binary output to the signed-by
+      # path - the filename must end in .gpg, since apt rejects binary
+      # content under a .asc filename.
+      aptkey: False
       key_url: https://pgp.mongodb.com/server-REL.asc
                  {%- if 'oscodename' in grains %}
       # `grains.os|lower` returns 'debian' or 'ubuntu' - both serve
       # separate paths under repo.mongodb.org/apt/. The component is
       # `main` on Debian, `multiverse` on Ubuntu.
       # yamllint disable-line rule:line-length
-      name: deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/{{ grains.os|lower }} {{ grains.oscodename }}/mongodb-org/REL {{ 'main' if grains.os in ('Debian',) else 'multiverse' }}
+      name: deb [ signed-by=/etc/apt/keyrings/mongodb-org-REL.gpg arch=amd64,arm64 ] http://repo.mongodb.org/apt/{{ grains.os|lower }} {{ grains.oscodename }}/mongodb-org/REL {{ 'main' if grains.os in ('Debian',) else 'multiverse' }}
       # yamllint enable-line rule:line-length
                  {%- endif %}
     # mongod / mongos / dbtools `use_upstream: 'repo'` comes from
@@ -100,7 +102,6 @@ RedHat:
       # pgp.mongodb.com is MongoDB's current key host.
       # www.mongodb.org/static/pgp/ now 301-redirects here.
       gpgkey: https://pgp.mongodb.com/server-REL.asc
-      from_repo_value: ''
     # mongod / mongos / dbtools `use_upstream: 'repo'` comes from
     # defaults.yaml. Amazon Linux is the exception: MongoDB's official
     # yum repo doesn't cover the amzn2/amzn2023 oscodes (server-amzn2

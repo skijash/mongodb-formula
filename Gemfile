@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# CI pins Ruby 3.3.6 in .github/workflows/kitchen.yml. net-ssh 7.x
+# (the version Bundler resolves under the existing constraint)
+# handles OpenSSL 3 cleanly, so no special toolchain is needed.
+
 source ENV.fetch('PROXY_RUBYGEMSORG', 'https://rubygems.org')
 
 # Install the `inspec` gem using `git` because versions after `4.22.22`

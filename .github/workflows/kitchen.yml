@@ -24,6 +24,7 @@ jobs:
       matrix:
         instance:
           - default-ubuntu-2204-master-py3
+          - default-ubuntu-2404-master-py3
           - default-oraclelinux-8-master-py3
           - default-almalinux-8-master-py3
           - default-rockylinux-8-master-py3
@@ -50,18 +51,21 @@ jobs:
           github.event.inputs.instance == ''
           || github.event.inputs.instance == matrix.instance
         with:
-          # Pinned to 3.0 (EOL) because kitchen-salt 0.7.2 caps
-          # net-ssh < 7.0, and net-ssh 6.x breaks on OpenSSL 3.x with
-          # `pkeys are immutable on OpenSSL 3.0`. ruby/setup-ruby
-          # ships prebuilt 3.0 binaries linked against OpenSSL 1.1.x.
-          # Bump when kitchen-salt resumes releases (currently dormant
-          # since Jan 2022) or we switch to a fork.
-          ruby-version: '3.0'
+          # `bundler-cache: true` installs the Bundler pinned in
+          # Gemfile.lock (BUNDLED WITH 4.0.14), which requires
+          # Ruby 3.1+ - bump together with that pin when it changes.
+          ruby-version: '3.3.6'
           bundler-cache: true
       - name: kitchen verify
         if: >-
           github.event.inputs.instance == ''
           || github.event.inputs.instance == matrix.instance
+        env:
+          # Older verifier code references Gem::Package::TarWriter
+          # without requiring RubyGems' package support first. Keep the
+          # preload at the Kitchen invocation layer; bin/kitchen is a
+          # generated Bundler binstub.
+          RUBYOPT: -rrubygems/package
         run: bin/kitchen verify "${{ matrix.instance }}"
       - name: dump diagnostics on failure
         if: >-
@@ -69,6 +73,8 @@ jobs:
             github.event.inputs.instance == ''
             || github.event.inputs.instance == matrix.instance
           )
+        env:
+          RUBYOPT: -rrubygems/package
         run: |
           set +e
           echo "::group::kitchen diagnose --all"

@@ -60,6 +60,12 @@ jobs:
         if: >-
           github.event.inputs.instance == ''
           || github.event.inputs.instance == matrix.instance
+        env:
+          # Older verifier code references Gem::Package::TarWriter
+          # without requiring RubyGems' package support first. Keep the
+          # preload at the Kitchen invocation layer; bin/kitchen is a
+          # generated Bundler binstub.
+          RUBYOPT: -rrubygems/package
         run: bin/kitchen verify "${{ matrix.instance }}"
       - name: dump diagnostics on failure
         if: >-
@@ -67,6 +73,8 @@ jobs:
             github.event.inputs.instance == ''
             || github.event.inputs.instance == matrix.instance
           )
+        env:
+          RUBYOPT: -rrubygems/package
         run: |
           set +e
           echo "::group::kitchen diagnose --all"
